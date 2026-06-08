@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Analyseur d'Actions — Score d'Investissement</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0D1B2A;
+    --navy2: #15263A;
+    --gold: #C9A84C;
+    --gold-light: #F0D080;
+    --teal: #1B6CA8;
+    --teal-light: #E6F1FB;
+    --green: #0F6E56;
+    --green-light: #E1F5EE;
+    --amber: #854F0B;
+    --amber-light: #FAEEDA;
+    --red: #A32D2D;
+    --red-light: #FCEBEB;
+    --bg: #F7F5F0;
+    --surface: #FFFFFF;
+    --border: rgba(13,27,42,0.1);
+    --text: #0D1B2A;
+    --text2: #5A6A7A;
+    --text3: #9AABB8;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  .app-header {
+    background: var(--navy);
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 60px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 2px solid var(--gold);
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #fff;
+    font-family: 'DM Serif Display', serif;
+    font-size: 18px;
+  }
+  .logo-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--gold);
+  }
+  .header-badge {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--gold);
+    border: 1px solid var(--gold);
+    padding: 2px 10px;
+    border-radius: 20px;
+    letter-spacing: .05em;
+  }
+
+  /* ── LAYOUT ── */
+  .app-body {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 4rem;
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 1.5rem;
+    align-items: start;
+  }
+
+  /* ── PANELS ── */
+  .panel {
+    background: var(--surface);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+  .panel-header {
+    padding: .875rem 1.25rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--text2);
+  }
+  .panel-header-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--gold);
+    flex-shrink: 0;
+  }
+  .panel-body { padding: 1.25rem; }
+
+  /* ── TICKER INPUT ── */
+  .ticker-area {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 1.25rem;
+    align-items: flex-end;
+  }
+  .ticker-area .field { flex: 1; }
+  .ticker-input {
+    font-family: 'DM Serif Display', serif;
+    font-size: 20px;
+    width: 100%;
+    border: none;
+    border-bottom: 2px solid var(--border);
+    padding: 6px 0;
+    background: transparent;
+    color: var(--text);
+    outline: none;
+    transition: border-color .2s;
+  }
+  .ticker-input:focus { border-color: var(--gold); }
+  .ticker-input::placeholder { color: var(--text3); font-style: italic; }
+
+  /* ── SECTIONS ── */
+  .section { margin-bottom: 1.5rem; }
+  .section:last-child { margin-bottom: 0; }
+  .section-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--text3);
+    margin-bottom: .875rem;
+    padding-bottom: .5rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .section-icon {
+    width: 18px; height: 18px;
+    border-radius: 4px;
+    background: var(--navy);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    color: var(--gold);
+    flex-shrink: 0;
+  }
+
+  /* ── GRID ── */
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: .875rem; }
+  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: .875rem; }
+
+  /* ── FIELDS ── */
+  .field { display: flex; flex-direction: column; gap: 4px; }
+  .field label {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text2);
+    letter-spacing: .03em;
+  }
+  .field input, .field select {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 7px 10px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: #FAFAF8;
+    color: var(--text);
+    outline: none;
+    transition: border-color .15s, background .15s;
+  }
+  .field input:focus, .field select:focus {
+    border-color: var(--teal);
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(27,108,168,.08);
+  }
+  .field .hint {
+    font-size: 10px;
+    color: var(--text3);
+    line-height: 1.3;
+  }
+
+  /* ── HALAL TOGGLE ── */
+  .halal-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: .75rem 1rem;
+    background: #FFF9EC;
+    border: 1px solid #EFD98A;
+    border-radius: var(--radius-sm);
+    margin-bottom: 1.25rem;
+    cursor: pointer;
+    user-select: none;
+  }
+  .halal-row span {
+    font-size: 12px;
+    font-weight: 500;
+    color: #7A5C0A;
+    flex: 1;
+  }
+  .toggle {
+    width: 38px; height: 22px;
+    border-radius: 11px;
+    background: #D5C8A8;
+    position: relative;
+    transition: background .2s;
+    flex-shrink: 0;
+  }
+  .toggle.on { background: var(--gold); }
+  .toggle-knob {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: #fff;
+    position: absolute;
+    top: 2px; left: 2px;
+    transition: left .2s;
+    box-shadow: 0 1px 3px rgba(0,0,0,.2);
+  }
+  .toggle.on .toggle-knob { left: 18px; }
+
+  /* ── SUBMIT ── */
+  .btn-main {
+    width: 100%;
+    padding: 13px;
+    background: var(--navy);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    letter-spacing: .03em;
+    transition: background .15s, transform .1s;
+    margin-bottom: .75rem;
+  }
+  .btn-main:hover { background: #1a2f45; }
+  .btn-main:active { transform: scale(.99); }
+  .btn-secondary {
+    width: 100%;
+    padding: 10px;
+    background: transparent;
+    color: var(--text2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background .15s;
+  }
+  .btn-secondary:hover { background: var(--bg); }
+
+  /* ── SCORE SIDEBAR ── */
+  .score-sticky { position: sticky; top: 76px; }
+
+  .score-card {
+    background: var(--navy);
+    border-radius: var(--radius);
+    overflow: hidden;
+    color: #fff;
+  }
+  .score-top {
+    padding: 1.5rem 1.5rem 1rem;
+    position: relative;
+  }
+  .score-ticker {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: .375rem;
+  }
+  .score-number {
+    font-family: 'DM Serif Display', serif;
+    font-size: 64px;
+    line-height: 1;
+    color: #fff;
+  }
+  .score-slash {
+    font-size: 24px;
+    color: rgba(255,255,255,.3);
+    vertical-align: super;
+  }
+  .score-label { font-size: 13px; color: rgba(255,255,255,.5); margin-top: 4px; }
+
+  .score-bar-wrap {
+    height: 5px;
+    background: rgba(255,255,255,.1);
+    margin: 1rem 1.5rem 0;
+  }
+  .score-bar {
+    height: 100%;
+    transition: width .6s cubic-bezier(.25,.46,.45,.94);
+  }
+
+  .verdict-strip {
+    padding: .875rem 1.5rem;
+    font-size: 13px;
+    font-weight: 600;
+    border-top: 1px solid rgba(255,255,255,.08);
+    margin-top: 1rem;
+  }
+  .verdict-advice {
+    font-weight: 400;
+    font-size: 12px;
+    color: rgba(255,255,255,.6);
+    margin-top: 4px;
+    line-height: 1.5;
+  }
+
+  /* ── CATEGORY MINI BARS ── */
+  .cats-section { padding: 1rem 1.5rem; border-top: 1px solid rgba(255,255,255,.08); }
+  .cat-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: .625rem;
+  }
+  .cat-row:last-child { margin-bottom: 0; }
+  .cat-row-name { font-size: 11px; color: rgba(255,255,255,.55); flex: 0 0 110px; }
+  .cat-mini-track {
+    flex: 1;
+    height: 4px;
+    background: rgba(255,255,255,.1);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .cat-mini-fill { height: 100%; border-radius: 2px; transition: width .5s ease; }
+  .cat-row-pts {
+    font-size: 11px;
+    font-weight: 600;
+    color: rgba(255,255,255,.7);
+    flex: 0 0 32px;
+    text-align: right;
+  }
+
+  /* ── DETAIL BREAKDOWN ── */
+  .detail-panel { margin-top: 1.5rem; }
+  .detail-section { margin-bottom: 1rem; }
+  .detail-section-title {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--text3);
+    margin-bottom: .5rem;
+  }
+  .detail-row {
+    display: flex;
+    align-items: center;
+    padding: 5px 0;
+    border-bottom: 1px solid var(--border);
+    gap: 8px;
+  }
+  .detail-row:last-child { border-bottom: none; }
+  .detail-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .detail-name { font-size: 12px; color: var(--text2); flex: 1; }
+  .detail-val { font-size: 12px; font-weight: 600; color: var(--text); }
+  .detail-pts-badge {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 10px;
+  }
+
+  /* ── EMPTY STATE ── */
+  .empty {
+    text-align: center;
+    padding: 2.5rem 1.5rem;
+    color: rgba(255,255,255,.3);
+  }
+  .empty-icon {
+    font-size: 32px;
+    margin-bottom: .75rem;
+    display: block;
+  }
+  .empty p { font-size: 12px; line-height: 1.6; }
+
+  /* ── HALAL BADGE ── */
+  .halal-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 3px 9px;
+    border-radius: 20px;
+    background: #FFF3CD;
+    color: #7A5C0A;
+    border: 1px solid #EFD98A;
+    margin-left: .5rem;
+  }
+
+  /* ── FOOTER DISCLAIMER ── */
+  .disclaimer {
+    grid-column: 1 / -1;
+    font-size: 10px;
+    color: var(--text3);
+    text-align: center;
+    padding-top: .5rem;
+    line-height: 1.6;
+    border-top: 1px solid var(--border);
+  }
+
+  @media (max-width: 700px) {
+    .app-body { grid-template-columns: 1fr; }
+    .score-sticky { position: static; order: -1; }
+    .grid3 { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="logo">
+    <div class="logo-dot"></div>
+    Analyseur d'Actions
+  </div>
+  <div class="header-badge">Score d'investissement</div>
+</header>
+
+<div class="app-body">
+
+  <!-- ── FORMULAIRE ── -->
+  <div>
+    <div class="panel" style="margin-bottom:1.25rem">
+      <div class="panel-header">
+        <div class="panel-header-dot"></div>
+        Identification
+      </div>
+      <div class="panel-body">
+        <div class="ticker-area">
+          <div class="field" style="flex:1">
+            <label>Nom de l'action / Ticker</label>
+            <input id="ticker" class="ticker-input" type="text" placeholder="ex : Apple (AAPL), TotalEnergies (TTE)…" />
+          </div>
+        </div>
+        <div class="halal-row" onclick="toggleHalal()" id="halal-row">
+          <span>☪ Filtre halal — pénalise banques, assurances, alcool, armement</span>
+          <div class="toggle" id="htoggle"><div class="toggle-knob"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- VALORISATION -->
+    <div class="panel" style="margin-bottom:1.25rem">
+      <div class="panel-header">
+        <div class="panel-header-dot"></div>
+        Valorisation <span style="color:var(--text3);font-weight:400;margin-left:auto">20 pts max</span>
+      </div>
+      <div class="panel-body">
+        <div class="grid3">
+          <div class="field">
+            <label>PER</label>
+            <input id="per" type="number" step="0.1" placeholder="ex : 22">
+            <span class="hint">Idéal : 10–25</span>
+          </div>
+          <div class="field">
+            <label>PEG Ratio</label>
+            <input id="peg" type="number" step="0.01" placeholder="ex : 1.2">
+            <span class="hint">Idéal : &lt; 1</span>
+          </div>
+          <div class="field">
+            <label>EV / EBITDA</label>
+            <input id="ev" type="number" step="0.1" placeholder="ex : 12">
+            <span class="hint">Idéal : &lt; 15</span>
+          </div>
+          <div class="field">
+            <label>Price / Book</label>
+            <input id="pb" type="number" step="0.1" placeholder="ex : 2.5">
+            <span class="hint">Idéal : &lt; 3</span>
+          </div>
+          <div class="field">
+            <label>Price / FCF</label>
+            <input id="pfcf" type="number" step="0.1" placeholder="ex : 20">
+            <span class="hint">Idéal : &lt; 25</span>
+          </div>
+          <div class="field">
+            <label>Price / Sales</label>
+            <input id="ps" type="number" step="0.1" placeholder="ex : 3">
+            <span class="hint">Idéal : &lt; 5</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RENTABILITE -->
+    <div class="panel" style="margin-bottom:1.25rem">
+      <div class="panel-header">
+        <div class="panel-header-dot"></div>
+        Rentabilité <span style="color:var(--text3);font-weight:400;margin-left:auto">20 pts max</span>
+      </div>
+      <div class="panel-body">
+        <div class="grid3">
+          <div class="field">
+            <label>ROE (%)</label>
+            <input id="roe" type="number" step="0.1" placeholder="ex : 18">
+            <span class="hint">Idéal : &gt; 15 %</span>
+          </div>
+          <div class="field">
+            <label>ROIC (%)</label>
+            <input id="roic" type="number" step="0.1" placeholder="ex : 12">
+            <span class="hint">Idéal : &gt; 10 %</span>
+          </div>
+          <div class="field">
+            <label>Marge nette (%)</label>
+            <input id="nm" type="number" step="0.1" placeholder="ex : 15">
+            <span class="hint">Idéal : &gt; 10 %</span>
+          </div>
+          <div class="field">
+            <label>Marge brute (%)</label>
+            <input id="gm" type="number" step="0.1" placeholder="ex : 45">
+            <span class="hint">Idéal : &gt; 30 %</span>
+          </div>
+          <div class="field">
+            <label>Marge opérationnelle (%)</label>
+            <input id="om" type="number" step="0.1" placeholder="ex : 20">
+            <span class="hint">Idéal : &gt; 15 %</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CROISSANCE -->
+    <div class="panel" style="margin-bottom:1.25rem">
+      <div class="panel-header">
+        <div class="panel-header-dot"></div>
+        Croissance <small style="font-size:10px;font-weight:400;color:var(--text3)">(sur 5 ans)</small>
+        <span style="color:var(--text3);font-weight:400;margin-left:auto">20 pts max</span>
+      </div>
+      <div class="panel-body">
+        <div class="grid3">
+          <div class="field">
+            <label>Croissance CA (%/an)</label>
+            <input id="rcg" type="number" step="0.1" placeholder="ex : 12">
+            <span class="hint">Idéal : &gt; 10 %</span>
+          </div>
+          <div class="field">
+            <label>Croissance BPA (%/an)</label>
+            <input id="epsg" type="number" step="0.1" placeholder="ex : 15">
+            <span class="hint">Idéal : &gt; 10 %</span>
+          </div>
+          <div class="field">
+            <label>Croissance FCF (%/an)</label>
+            <input id="fcfg" type="number" step="0.1" placeholder="ex : 10">
+            <span class="hint">Idéal : &gt; 8 %</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SOLIDITE -->
+    <div class="panel" style="margin-bottom:1.25rem">
+      <div class="panel-header">
+        <div class="panel-header-dot"></div>
+        Solidité financière <span style="color:var(--text3);font-weight:400;margin-left:auto">20 pts max</span>
+      </div>
+      <div class="panel-body">
+        <div class="grid3">
+          <div class="field">
+            <label>Dette nette / EBITDA</label>
+            <input id="de" type="number" step="0.1" placeholder="ex : 1.5">
+            <span class="hint">Idéal : &lt; 2×</span>
+          </div>
+          <div class="field">
+            <label>Ratio de liquidité</label>
+            <input id="cr" type="number" step="0.01" placeholder="ex : 2.1">
+            <span class="hint">Idéal : &gt; 1.5</span>
+          </div>
+          <div class="field">
+            <label>Couverture intérêts</label>
+            <input id="ic" type="number" step="0.1" placeholder="ex : 8">
+            <span class="hint">Idéal : &gt; 3×</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DIVIDENDES -->
+    <div class="panel" style="margin-bottom:1.25rem">
+      <div class="panel-header">
+        <div class="panel-header-dot"></div>
+        Dividendes <small style="font-size:10px;font-weight:400;color:var(--text3)">(facultatif)</small>
+        <span style="color:var(--text3);font-weight:400;margin-left:auto">10 pts max</span>
+      </div>
+      <div class="panel-body">
+        <div class="grid3">
+          <div class="field">
+            <label>Rendement (%)</label>
+            <input id="dy" type="number" step="0.1" placeholder="ex : 2.5">
+            <span class="hint">Idéal : 1–5 %</span>
+          </div>
+          <div class="field">
+            <label>Taux distribution (%)</label>
+            <input id="po" type="number" step="0.1" placeholder="ex : 40">
+            <span class="hint">Idéal : &lt; 60 %</span>
+          </div>
+          <div class="field">
+            <label>Croissance div. (%/an)</label>
+            <input id="dg" type="number" step="0.1" placeholder="ex : 5">
+            <span class="hint">Idéal : &gt; 5 %</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- QUALITATIF -->
+    <div class="panel" style="margin-bottom:1.5rem">
+      <div class="panel-header">
+        <div class="panel-header-dot"></div>
+        Évaluation qualitative <span style="color:var(--text3);font-weight:400;margin-left:auto">10 pts max</span>
+      </div>
+      <div class="panel-body">
+        <div class="grid2">
+          <div class="field">
+            <label>Force du moat (avantage concurrentiel)</label>
+            <select id="moat">
+              <option value="">-- Sélectionner --</option>
+              <option value="4">Fort (marque, réseau, brevets)</option>
+              <option value="2">Moyen (quelques avantages)</option>
+              <option value="0">Faible (secteur très concurrentiel)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Qualité du management</label>
+            <select id="mgmt">
+              <option value="">-- Sélectionner --</option>
+              <option value="3">Excellent (actionnaire, vision claire)</option>
+              <option value="1.5">Correct (pas de signal négatif)</option>
+              <option value="0">Médiocre (dilution, opacité)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Tendance du secteur</label>
+            <select id="sect">
+              <option value="">-- Sélectionner --</option>
+              <option value="3">En forte croissance (IA, santé, energie)</option>
+              <option value="1.5">Stable (défensif, consommation)</option>
+              <option value="0">En déclin ou très cyclique</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Secteur problématique (halal)</label>
+            <select id="haram">
+              <option value="0">Non — activité neutre</option>
+              <option value="1">Banque / Assurance / Finance conventionnelle</option>
+              <option value="2">Alcool / Tabac / Jeux / Armement / Adulte</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn-main" onclick="analyze()">Calculer le score d'investissement →</button>
+    <button class="btn-secondary" onclick="resetAll()">Réinitialiser le formulaire</button>
+  </div>
+
+  <!-- ── SCORE SIDEBAR ── -->
+  <div class="score-sticky">
+    <div class="score-card" id="score-card">
+      <div class="score-top">
+        <div class="score-ticker" id="s-ticker">EN ATTENTE</div>
+        <div>
+          <span class="score-number" id="s-number">—</span>
+          <span class="score-slash"> /100</span>
+        </div>
+        <div class="score-label" id="s-label">Renseignez les données</div>
+      </div>
+      <div class="score-bar-wrap">
+        <div class="score-bar" id="s-bar" style="width:0;background:var(--gold)"></div>
+      </div>
+
+      <div class="verdict-strip" id="s-verdict">
+        <div class="empty">
+          <span class="empty-icon">📊</span>
+          <p>Remplissez le formulaire et cliquez sur <strong>Calculer</strong> pour voir votre score.</p>
+        </div>
+      </div>
+
+      <div class="cats-section" id="s-cats" style="display:none"></div>
+    </div>
+
+    <div class="detail-panel" id="s-detail" style="display:none"></div>
+  </div>
+
+  <div class="disclaimer">
+    ⚠ Document informatif uniquement — Ne constitue pas un conseil en investissement. Tout investissement comporte un risque de perte en capital.
+  </div>
+</div>
+
+<script>
+let halalOn = false;
+
+function toggleHalal() {
+  halalOn = !halalOn;
+  const t = document.getElementById('htoggle');
+  t.classList.toggle('on', halalOn);
+}
+
+function v(id) {
+  const val = parseFloat(document.getElementById(id).value);
+  return isNaN(val) ? null : val;
+}
+
+function scoreColor(s) {
+  if (s >= 75) return { bar: '#1D9E75', text: '#5EDFB8', verdict: '#1D9E75' };
+  if (s >= 55) return { bar: '#3A9BD5', text: '#7EC6F0', verdict: '#3A9BD5' };
+  if (s >= 40) return { bar: '#EF9F27', text: '#F8CE7A', verdict: '#EF9F27' };
+  return { bar: '#E24B4A', text: '#F08080', verdict: '#E24B4A' };
+}
+
+function dotColor(sig) {
+  if (sig === 'pos') return '#1D9E75';
+  if (sig === 'warn') return '#EF9F27';
+  if (sig === 'neg') return '#E24B4A';
+  return '#9AABB8';
+}
+function badgeStyle(sig) {
+  if (sig === 'pos') return 'background:#E1F5EE;color:#0F6E56';
+  if (sig === 'warn') return 'background:#FAEEDA;color:#854F0B';
+  if (sig === 'neg') return 'background:#FCEBEB;color:#A32D2D';
+  return 'background:#F1EFE8;color:#5F5E5A';
+}
+
+function analyze() {
+  const ticker = document.getElementById('ticker').value.trim() || 'Action';
+  let cats = {};
+
+  // VALORISATION
+  let vpts = 0, vdet = [];
+  const per = v('per');
+  if (per !== null) { let p = per<15?4:per<25?3:per<35?2:per<50?1:0, s = per<25?'pos':per<50?'warn':'neg'; vpts+=p; vdet.push({n:'PER', v:per.toFixed(1), p, max:4, s}); }
+  const peg = v('peg');
+  if (peg !== null) { let p = peg<1?4:peg<1.5?3:peg<2?2:peg<3?1:0, s = peg<1.5?'pos':peg<2.5?'warn':'neg'; vpts+=p; vdet.push({n:'PEG', v:peg.toFixed(2), p, max:4, s}); }
+  const ev = v('ev');
+  if (ev !== null) { let p = ev<10?4:ev<15?3:ev<20?2:ev<30?1:0, s = ev<15?'pos':ev<25?'warn':'neg'; vpts+=p; vdet.push({n:'EV/EBITDA', v:ev.toFixed(1)+'×', p, max:4, s}); }
+  const pb = v('pb');
+  if (pb !== null) { let p = pb<2?2:pb<4?1.5:pb<7?1:0, s = pb<4?'pos':pb<7?'warn':'neg'; vpts+=p; vdet.push({n:'P/Book', v:pb.toFixed(1), p, max:2, s}); }
+  const pfcf = v('pfcf');
+  if (pfcf !== null) { let p = pfcf<15?3:pfcf<25?2:pfcf<35?1:0, s = pfcf<25?'pos':pfcf<35?'warn':'neg'; vpts+=p; vdet.push({n:'P/FCF', v:pfcf.toFixed(1), p, max:3, s}); }
+  const ps = v('ps');
+  if (ps !== null) { let p = ps<2?3:ps<5?2:ps<10?1:0, s = ps<5?'pos':ps<10?'warn':'neg'; vpts+=p; vdet.push({n:'P/Sales', v:ps.toFixed(1), p, max:3, s}); }
+  cats['Valorisation'] = { pts: vpts, max: 20, det: vdet };
+
+  // RENTABILITE
+  let rpts = 0, rdet = [];
+  const roe = v('roe');
+  if (roe !== null) { let p = roe>25?5:roe>15?4:roe>10?2:roe>5?1:0, s = roe>15?'pos':roe>5?'warn':'neg'; rpts+=p; rdet.push({n:'ROE', v:roe.toFixed(1)+'%', p, max:5, s}); }
+  const roic = v('roic');
+  if (roic !== null) { let p = roic>15?5:roic>10?3:roic>5?1.5:0, s = roic>10?'pos':roic>5?'warn':'neg'; rpts+=p; rdet.push({n:'ROIC', v:roic.toFixed(1)+'%', p, max:5, s}); }
+  const nm = v('nm');
+  if (nm !== null) { let p = nm>20?4:nm>10?3:nm>5?2:nm>0?1:0, s = nm>10?'pos':nm>5?'warn':'neg'; rpts+=p; rdet.push({n:'Marge nette', v:nm.toFixed(1)+'%', p, max:4, s}); }
+  const gm = v('gm');
+  if (gm !== null) { let p = gm>50?3:gm>30?2:gm>15?1:0, s = gm>30?'pos':gm>15?'warn':'neg'; rpts+=p; rdet.push({n:'Marge brute', v:gm.toFixed(1)+'%', p, max:3, s}); }
+  const om = v('om');
+  if (om !== null) { let p = om>20?3:om>15?2:om>8?1:0, s = om>15?'pos':om>8?'warn':'neg'; rpts+=p; rdet.push({n:'Marge opérat.', v:om.toFixed(1)+'%', p, max:3, s}); }
+  cats['Rentabilité'] = { pts: rpts, max: 20, det: rdet };
+
+  // CROISSANCE
+  let cpts = 0, cdet = [];
+  const rcg = v('rcg');
+  if (rcg !== null) { let p = rcg>20?7:rcg>10?5:rcg>5?3:rcg>0?1:0, s = rcg>10?'pos':rcg>0?'warn':'neg'; cpts+=p; cdet.push({n:'Croissance CA', v:rcg.toFixed(1)+'%/an', p, max:7, s}); }
+  const epsg = v('epsg');
+  if (epsg !== null) { let p = epsg>20?7:epsg>10?5:epsg>5?3:epsg>0?1:0, s = epsg>10?'pos':epsg>0?'warn':'neg'; cpts+=p; cdet.push({n:'Croissance BPA', v:epsg.toFixed(1)+'%/an', p, max:7, s}); }
+  const fcfg = v('fcfg');
+  if (fcfg !== null) { let p = fcfg>15?6:fcfg>8?4:fcfg>3?2:fcfg>0?1:0, s = fcfg>8?'pos':fcfg>0?'warn':'neg'; cpts+=p; cdet.push({n:'Croissance FCF', v:fcfg.toFixed(1)+'%/an', p, max:6, s}); }
+  cats['Croissance'] = { pts: cpts, max: 20, det: cdet };
+
+  // SOLIDITE
+  let spts = 0, sdet = [];
+  const de = v('de');
+  if (de !== null) { let p = de<0?8:de<1?8:de<2?6:de<3?4:de<4?2:0, s = de<2?'pos':de<4?'warn':'neg'; spts+=p; sdet.push({n:'Dette/EBITDA', v:de.toFixed(1)+'×', p, max:8, s}); }
+  const cr = v('cr');
+  if (cr !== null) { let p = cr>2?6:cr>1.5?4:cr>1?2:0, s = cr>1.5?'pos':cr>1?'warn':'neg'; spts+=p; sdet.push({n:'Ratio liquidité', v:cr.toFixed(2), p, max:6, s}); }
+  const ic = v('ic');
+  if (ic !== null) { let p = ic>8?6:ic>5?4:ic>3?2:ic>1?1:0, s = ic>5?'pos':ic>3?'warn':'neg'; spts+=p; sdet.push({n:'Couv. intérêts', v:ic.toFixed(1)+'×', p, max:6, s}); }
+  cats['Solidité financière'] = { pts: spts, max: 20, det: sdet };
+
+  // DIVIDENDES
+  let dpts = 0, ddet = [];
+  const dy = v('dy');
+  if (dy !== null) { let p = (dy>=1&&dy<=4)?3:(dy>4&&dy<=6)?2:(dy>6)?0:1, s = (dy>=1&&dy<=4)?'pos':dy>6?'neg':'warn'; dpts+=p; ddet.push({n:'Rendement', v:dy.toFixed(1)+'%', p, max:3, s}); }
+  const po = v('po');
+  if (po !== null) { let p = (po>0&&po<50)?3:po<70?2:po<85?1:0, s = po<60?'pos':po<80?'warn':'neg'; dpts+=p; ddet.push({n:'Taux distribution', v:po.toFixed(0)+'%', p, max:3, s}); }
+  const dg = v('dg');
+  if (dg !== null) { let p = dg>8?4:dg>5?3:dg>2?2:dg>=0?1:0, s = dg>5?'pos':dg>=0?'warn':'neg'; dpts+=p; ddet.push({n:'Croissance div.', v:dg.toFixed(1)+'%/an', p, max:4, s}); }
+  cats['Dividendes'] = { pts: dpts, max: 10, det: ddet };
+
+  // QUALITATIF
+  let qpts = 0, qdet = [];
+  const moatV = parseFloat(document.getElementById('moat').value);
+  if (!isNaN(moatV) && document.getElementById('moat').value !== '') {
+    const s = moatV===4?'pos':moatV===2?'warn':'neg';
+    qpts+=moatV; qdet.push({n:'Moat', v:moatV===4?'Fort':moatV===2?'Moyen':'Faible', p:moatV, max:4, s});
+  }
+  const mgmtV = parseFloat(document.getElementById('mgmt').value);
+  if (!isNaN(mgmtV) && document.getElementById('mgmt').value !== '') {
+    const s = mgmtV===3?'pos':mgmtV===1.5?'warn':'neg';
+    qpts+=mgmtV; qdet.push({n:'Management', v:mgmtV===3?'Excellent':mgmtV===1.5?'Correct':'Médiocre', p:mgmtV, max:3, s});
+  }
+  const sectV = parseFloat(document.getElementById('sect').value);
+  if (!isNaN(sectV) && document.getElementById('sect').value !== '') {
+    const s = sectV===3?'pos':sectV===1.5?'warn':'neg';
+    qpts+=sectV; qdet.push({n:'Secteur', v:sectV===3?'En croissance':sectV===1.5?'Stable':'En déclin', p:sectV, max:3, s});
+  }
+  cats['Qualitatif'] = { pts: qpts, max: 10, det: qdet };
+
+  // SCORE FINAL
+  let tot = 0, maxTot = 0;
+  for (const c of Object.values(cats)) { tot += c.pts; maxTot += c.max; }
+
+  let penalty = 0;
+  if (halalOn) {
+    const hs = parseInt(document.getElementById('haram').value) || 0;
+    if (hs === 1) penalty = 15;
+    if (hs === 2) penalty = 40;
+  }
+
+  const raw = Math.round((tot / maxTot) * 100 - penalty);
+  const score = Math.max(0, Math.min(100, raw));
+  const col = scoreColor(score);
+
+  let verdict, advice;
+  if (score >= 80) { verdict = '● Opportunité forte'; advice = 'Fondamentaux excellents. Cherchez un bon point d\'entrée technique.'; }
+  else if (score >= 65) { verdict = '● Intéressant'; advice = 'Profil solide. Vérifiez le RSI et la MM200 avant d\'acheter.'; }
+  else if (score >= 50) { verdict = '● Neutre — à surveiller'; advice = 'Des atouts mais des faiblesses. Attendez une amélioration des chiffres.'; }
+  else if (score >= 35) { verdict = '● Médiocre'; advice = 'Trop de signaux négatifs. Ne pas se positionner sans catalyseur fort.'; }
+  else { verdict = '● À éviter'; advice = 'Fondamentaux insuffisants. Risque de perte en capital significatif.'; }
+
+  if (halalOn && penalty > 0) advice += ` (Pénalité halal : -${penalty} pts)`;
+
+  // RENDU SCORE CARD
+  document.getElementById('s-ticker').innerHTML = ticker.toUpperCase() + (halalOn ? '<span class="halal-badge">☪ Halal</span>' : '');
+  document.getElementById('s-number').textContent = score;
+  document.getElementById('s-number').style.color = col.text;
+  document.getElementById('s-label').textContent = 'Score d\'investissement';
+  document.getElementById('s-bar').style.width = score + '%';
+  document.getElementById('s-bar').style.background = col.bar;
+  document.getElementById('s-verdict').innerHTML = `<div style="color:${col.text};font-size:13px;font-weight:600;margin-bottom:4px">${verdict}</div><div class="verdict-advice">${advice}</div>`;
+
+  // MINI BARS PAR CATEGORIE
+  const catColors = {'Valorisation':'#3A9BD5','Rentabilité':'#1D9E75','Croissance':'#9B59B6','Solidité financière':'#E67E22','Dividendes':'#E24B4A','Qualitatif':'#C9A84C'};
+  let catsHtml = '';
+  for (const [name, cat] of Object.entries(cats)) {
+    if (cat.max === 0) continue;
+    const pct = Math.round((cat.pts / cat.max) * 100);
+    const cc = catColors[name] || '#C9A84C';
+    catsHtml += `<div class="cat-row">
+      <div class="cat-row-name">${name}</div>
+      <div class="cat-mini-track"><div class="cat-mini-fill" style="width:${pct}%;background:${cc}"></div></div>
+      <div class="cat-row-pts">${Math.round(cat.pts)}/${cat.max}</div>
+    </div>`;
+  }
+  const catsEl = document.getElementById('s-cats');
+  catsEl.innerHTML = catsHtml;
+  catsEl.style.display = 'block';
+
+  // DETAIL BREAKDOWN
+  let detailHtml = '';
+  for (const [name, cat] of Object.entries(cats)) {
+    if (!cat.det || cat.det.length === 0) continue;
+    detailHtml += `<div class="detail-section">
+      <div class="detail-section-title">${name}</div>`;
+    for (const d of cat.det) {
+      detailHtml += `<div class="detail-row">
+        <div class="detail-dot" style="background:${dotColor(d.s)}"></div>
+        <div class="detail-name">${d.n}</div>
+        <div class="detail-val">${d.v}</div>
+        <div class="detail-pts-badge" style="${badgeStyle(d.s)}">${Math.round(d.p)} pts</div>
+      </div>`;
+    }
+    detailHtml += '</div>';
+  }
+  const detEl = document.getElementById('s-detail');
+  detEl.innerHTML = `<div class="panel"><div class="panel-header"><div class="panel-header-dot"></div>Détail par indicateur</div><div class="panel-body">${detailHtml}</div></div>`;
+  detEl.style.display = 'block';
+
+  document.getElementById('s-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function resetAll() {
+  document.querySelectorAll('input[type=number], input[type=text]').forEach(i => i.value = '');
+  document.querySelectorAll('select').forEach(s => s.selectedIndex = 0);
+  halalOn = false;
+  document.getElementById('htoggle').classList.remove('on');
+  document.getElementById('s-ticker').textContent = 'EN ATTENTE';
+  document.getElementById('s-number').textContent = '—';
+  document.getElementById('s-number').style.color = '#fff';
+  document.getElementById('s-label').textContent = 'Renseignez les données';
+  document.getElementById('s-bar').style.width = '0';
+  document.getElementById('s-verdict').innerHTML = `<div class="empty"><span class="empty-icon">📊</span><p>Remplissez le formulaire et cliquez sur <strong>Calculer</strong> pour voir votre score.</p></div>`;
+  document.getElementById('s-cats').style.display = 'none';
+  document.getElementById('s-detail').style.display = 'none';
+}
+</script>
+</body>
+</html>
