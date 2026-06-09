@@ -1,0 +1,1468 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StockAnalyzer Pro — Analyse complète</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#0D1B2A;--navy2:#15263A;--navy3:#1E3350;
+  --gold:#C9A84C;--gold2:#E8C870;--gold-light:#FFF8E7;
+  --teal:#1B6CA8;--teal2:#2589CC;
+  --green:#0A6B4A;--green2:#1D9E75;--green-light:#E1F5EE;
+  --amber:#7A4A08;--amber2:#EF9F27;--amber-light:#FEF3DC;
+  --red:#8B1E1E;--red2:#E24B4A;--red-light:#FEF0F0;
+  --blue:#1A4A8A;--blue2:#3A7BD5;--blue-light:#EBF3FD;
+  --purple:#5B2D8E;--purple2:#9B59B6;--purple-light:#F3EAF9;
+  --bg:#F4F2ED;--bg2:#EEEAE3;--surface:#FFFFFF;
+  --border:rgba(13,27,42,0.09);--border2:rgba(13,27,42,0.15);
+  --text:#0D1B2A;--text2:#4A5A6A;--text3:#8A9AAA;
+  --radius:14px;--radius-sm:8px;--radius-xs:6px;
+  --shadow:0 2px 12px rgba(13,27,42,0.08);
+  --shadow-lg:0 8px 32px rgba(13,27,42,0.12);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px}
+
+/* ── HEADER ── */
+.app-header{background:var(--navy);padding:0 1.75rem;display:flex;align-items:center;justify-content:space-between;height:58px;position:sticky;top:0;z-index:200;box-shadow:0 2px 16px rgba(0,0,0,.3)}
+.header-left{display:flex;align-items:center;gap:12px}
+.logo-mark{width:32px;height:32px;background:linear-gradient(135deg,var(--gold),var(--gold2));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px}
+.logo-text{color:#fff;font-family:'DM Serif Display',serif;font-size:17px;letter-spacing:-.01em}
+.logo-version{font-size:10px;font-weight:600;color:var(--gold);background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.3);padding:2px 7px;border-radius:10px;letter-spacing:.06em}
+.header-right{display:flex;align-items:center;gap:10px}
+.header-btn{padding:6px 14px;font-size:12px;font-weight:600;border-radius:6px;cursor:pointer;border:none;font-family:'DM Sans',sans-serif;transition:all .15s}
+.btn-ghost{background:rgba(255,255,255,.08);color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.12)}
+.btn-ghost:hover{background:rgba(255,255,255,.15);color:#fff}
+.btn-gold{background:var(--gold);color:var(--navy)}
+.btn-gold:hover{background:var(--gold2)}
+
+/* ── LAYOUT ── */
+.app-body{max-width:1100px;margin:0 auto;padding:1.75rem 1.5rem 5rem;display:grid;grid-template-columns:1fr 360px;gap:1.5rem;align-items:start}
+
+/* ── FORM PANELS ── */
+.panel{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);box-shadow:var(--shadow);margin-bottom:1.25rem;overflow:hidden}
+.panel-header{padding:.875rem 1.25rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.ph-icon{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.ph-title{font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text2);flex:1}
+.ph-max{font-size:11px;font-weight:500;color:var(--text3);background:var(--bg);padding:2px 8px;border-radius:10px}
+.ph-badge{font-size:10px;font-weight:600;padding:2px 7px;border-radius:8px}
+.ph-badge.new{background:var(--green-light);color:var(--green)}
+.panel-body{padding:1.25rem}
+
+/* ── SUBSECTIONS ── */
+.sub-label{font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--text3);margin-bottom:.875rem;display:flex;align-items:center;gap:6px}
+.sub-label::after{content:'';flex:1;height:1px;background:var(--border)}
+.sub-sep{height:1px;background:var(--border);margin:1.25rem 0}
+
+/* ── GRIDS ── */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:.875rem}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.875rem}
+.g4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:.875rem}
+
+/* ── FIELDS ── */
+.field{display:flex;flex-direction:column;gap:4px}
+.field label{font-size:11px;font-weight:600;color:var(--text2);letter-spacing:.02em;display:flex;align-items:center;gap:4px}
+.field input,.field select{font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;padding:7px 10px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:#FAFAF8;color:var(--text);outline:none;transition:all .15s;width:100%}
+.field input:focus,.field select:focus{border-color:var(--teal2);background:#fff;box-shadow:0 0 0 3px rgba(27,108,168,.1)}
+.field input::placeholder{color:var(--text3);font-weight:400}
+.hint{font-size:10px;color:var(--text3);line-height:1.4;margin-top:1px}
+.hint.good{color:var(--green)}
+.hint.warn{color:var(--amber2)}
+.hint.bad{color:var(--red2)}
+
+/* ── TICKER ── */
+.ticker-wrap{display:flex;gap:10px;align-items:flex-end;margin-bottom:1rem}
+.ticker-main{flex:1}
+.ticker-input{font-family:'DM Serif Display',serif;font-size:22px;width:100%;border:none;border-bottom:2.5px solid var(--border);padding:6px 0;background:transparent;color:var(--text);outline:none;transition:border-color .2s}
+.ticker-input:focus{border-color:var(--gold)}
+.ticker-input::placeholder{color:var(--text3);font-style:italic;font-size:18px}
+.sector-sel{width:200px}
+
+/* ── HALAL ── */
+.halal-row{display:flex;align-items:center;gap:10px;padding:.75rem 1rem;background:var(--gold-light);border:1.5px solid rgba(201,168,76,.35);border-radius:var(--radius-sm);cursor:pointer;user-select:none;transition:background .15s}
+.halal-row:hover{background:#FFF3CD}
+.halal-text{font-size:12px;font-weight:500;color:#6B4C08;flex:1}
+.toggle-pill{width:40px;height:22px;border-radius:11px;background:#D5C8A8;position:relative;transition:background .2s;flex-shrink:0}
+.toggle-pill.on{background:var(--gold)}
+.toggle-knob{width:18px;height:18px;border-radius:50%;background:#fff;position:absolute;top:2px;left:2px;transition:left .2s;box-shadow:0 1px 4px rgba(0,0,0,.2)}
+.toggle-pill.on .toggle-knob{left:20px}
+
+/* ── YES/NO ── */
+.yn-wrap{display:flex;gap:6px}
+.yn-btn{flex:1;padding:7px 6px;font-size:12px;font-weight:600;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:#FAFAF8;color:var(--text2);cursor:pointer;transition:all .15s;font-family:'DM Sans',sans-serif}
+.yn-btn:hover{background:var(--bg)}
+.yn-btn.yes.on{background:var(--green-light);border-color:var(--green2);color:var(--green)}
+.yn-btn.no.on{background:var(--red-light);border-color:var(--red2);color:var(--red)}
+
+/* ── SCALE ── */
+.scale-wrap{display:flex;gap:3px}
+.sc-btn{flex:1;padding:7px 2px;font-size:10px;font-weight:700;border:1.5px solid var(--border);border-radius:6px;background:#FAFAF8;color:var(--text3);cursor:pointer;transition:all .15s;text-align:center;font-family:'DM Sans',sans-serif;line-height:1.3}
+.sc-btn:hover{background:var(--bg);color:var(--text2)}
+.sc-btn.s-vn{background:var(--red-light);border-color:var(--red2);color:var(--red)}
+.sc-btn.s-n{background:var(--amber-light);border-color:var(--amber2);color:var(--amber)}
+.sc-btn.s-neu{background:var(--bg2);border-color:var(--border2);color:var(--text2)}
+.sc-btn.s-p{background:var(--blue-light);border-color:var(--blue2);color:var(--blue)}
+.sc-btn.s-vp{background:var(--green-light);border-color:var(--green2);color:var(--green)}
+
+/* ── STAR RATING ── */
+.stars{display:flex;gap:4px}
+.star{font-size:20px;cursor:pointer;color:#D5C8A8;transition:color .1s;user-select:none}
+.star.on{color:var(--gold)}
+
+/* ── RANGE SLIDER ── */
+.range-field{display:flex;flex-direction:column;gap:6px}
+.range-row{display:flex;align-items:center;gap:10px}
+.range-input{flex:1;-webkit-appearance:none;height:4px;border-radius:2px;background:var(--border2);outline:none;cursor:pointer}
+.range-input::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--teal2);cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.2)}
+.range-val{font-size:12px;font-weight:700;color:var(--teal2);font-family:'JetBrains Mono',monospace;min-width:32px;text-align:right}
+
+/* ── BUTTONS ── */
+.btn-primary{width:100%;padding:13px;background:linear-gradient(135deg,var(--navy),var(--navy3));color:#fff;border:none;border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;cursor:pointer;letter-spacing:.02em;transition:all .15s;margin-bottom:.75rem;box-shadow:0 4px 12px rgba(13,27,42,.25)}
+.btn-primary:hover{background:linear-gradient(135deg,var(--navy3),#254060);transform:translateY(-1px);box-shadow:0 6px 16px rgba(13,27,42,.3)}
+.btn-reset{width:100%;padding:9px;background:transparent;color:var(--text2);border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;transition:all .15s}
+.btn-reset:hover{background:var(--bg2);border-color:var(--border2)}
+
+/* ── INFO TOOLTIP ── */
+.tip{display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;border-radius:50%;background:var(--text3);color:#fff;font-size:8px;font-weight:800;cursor:help;vertical-align:middle;flex-shrink:0;position:relative}
+.tip:hover::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;font-size:11px;font-weight:400;padding:6px 10px;border-radius:6px;white-space:nowrap;max-width:220px;white-space:normal;width:220px;z-index:100;line-height:1.4;box-shadow:var(--shadow-lg);pointer-events:none}
+
+/* ── SIDEBAR SCORE CARD ── */
+.sidebar-sticky{position:sticky;top:74px}
+.score-card{background:linear-gradient(160deg,var(--navy),var(--navy2) 60%,#1a3a5c);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow-lg)}
+
+.sc-top{padding:1.5rem 1.5rem .75rem}
+.sc-ticker-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem}
+.sc-ticker{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--gold)}
+.sc-sector-tag{font-size:10px;font-weight:500;color:rgba(255,255,255,.4);background:rgba(255,255,255,.07);padding:2px 8px;border-radius:10px}
+.sc-number-row{display:flex;align-items:baseline;gap:6px;margin-bottom:4px}
+.sc-number{font-family:'DM Serif Display',serif;font-size:72px;line-height:1;color:#fff;transition:color .3s}
+.sc-denom{font-size:22px;color:rgba(255,255,255,.25)}
+.sc-sublabel{font-size:12px;color:rgba(255,255,255,.4)}
+
+.sc-bar-track{height:6px;background:rgba(255,255,255,.08);margin:1rem 1.5rem 0;border-radius:3px;overflow:hidden}
+.sc-bar-fill{height:100%;border-radius:3px;transition:width .7s cubic-bezier(.25,.46,.45,.94)}
+
+.sc-verdict{padding:1rem 1.5rem;border-top:1px solid rgba(255,255,255,.07);margin-top:1rem}
+.sc-verdict-title{font-size:14px;font-weight:700;margin-bottom:4px}
+.sc-verdict-text{font-size:11px;color:rgba(255,255,255,.55);line-height:1.6}
+
+/* TRAFFIC LIGHTS */
+.traffic-lights{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;padding:0 1.5rem 1rem}
+.tl{padding:.625rem .5rem;border-radius:8px;background:rgba(255,255,255,.05);text-align:center;border:1px solid rgba(255,255,255,.06)}
+.tl.tl-green{background:rgba(29,158,117,.15);border-color:rgba(29,158,117,.25)}
+.tl.tl-amber{background:rgba(239,159,39,.15);border-color:rgba(239,159,39,.25)}
+.tl.tl-red{background:rgba(226,75,74,.15);border-color:rgba(226,75,74,.25)}
+.tl.tl-grey{background:rgba(255,255,255,.04)}
+.tl-icon{font-size:16px;display:block;margin-bottom:2px}
+.tl-name{font-size:9px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:2px}
+.tl-val{font-size:11px;font-weight:700;color:rgba(255,255,255,.75)}
+
+/* CATS BARS */
+.cats-bars{padding:.875rem 1.5rem;border-top:1px solid rgba(255,255,255,.07)}
+.cat-row{display:flex;align-items:center;gap:10px;margin-bottom:.5rem}
+.cat-row:last-child{margin-bottom:0}
+.cat-name{font-size:10px;color:rgba(255,255,255,.45);flex:0 0 90px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cat-track{flex:1;height:4px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden}
+.cat-fill{height:100%;border-radius:2px;transition:width .5s ease}
+.cat-pts{font-size:10px;font-weight:700;color:rgba(255,255,255,.6);flex:0 0 38px;text-align:right;font-family:'JetBrains Mono',monospace}
+
+/* RECOMMENDATION BOX */
+.reco-box{margin:0 1.5rem 1.25rem;padding:.875rem 1rem;border-radius:10px;border:1px solid}
+.reco-box.reco-buy{background:rgba(29,158,117,.12);border-color:rgba(29,158,117,.3)}
+.reco-box.reco-watch{background:rgba(58,155,213,.12);border-color:rgba(58,155,213,.3)}
+.reco-box.reco-wait{background:rgba(239,159,39,.12);border-color:rgba(239,159,39,.3)}
+.reco-box.reco-avoid{background:rgba(226,75,74,.12);border-color:rgba(226,75,74,.3)}
+.reco-title{font-size:12px;font-weight:700;margin-bottom:4px}
+.reco-actions{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}
+.reco-tag{font-size:10px;font-weight:600;padding:3px 8px;border-radius:10px;background:rgba(255,255,255,.1);color:rgba(255,255,255,.7)}
+
+/* DETAIL BREAKDOWN */
+.breakdown{margin-top:1.5rem}
+.bk-section{margin-bottom:1rem}
+.bk-title{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--text3);margin-bottom:.5rem;display:flex;align-items:center;gap:6px}
+.bk-title-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.bk-row{display:flex;align-items:center;padding:5px 0;border-bottom:1px solid var(--border);gap:8px}
+.bk-row:last-child{border-bottom:none}
+.bk-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.bk-name{font-size:12px;color:var(--text2);flex:1}
+.bk-val{font-size:11px;font-weight:700;color:var(--text);font-family:'JetBrains Mono',monospace}
+.bk-badge{font-size:10px;font-weight:700;padding:2px 7px;border-radius:8px;white-space:nowrap}
+
+/* EMPTY */
+.empty{text-align:center;padding:2rem 1.5rem;color:rgba(255,255,255,.25)}
+.empty-icon{font-size:36px;display:block;margin-bottom:.75rem}
+.empty p{font-size:11px;line-height:1.7}
+
+/* PROGRESS BAR on panels */
+.panel-progress{height:3px;background:var(--border);position:relative}
+.panel-progress-fill{height:100%;transition:width .3s;border-radius:0 2px 2px 0}
+
+/* SCORE PILL */
+.score-pill{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700}
+
+/* HALAL BADGE */
+.halal-badge{font-size:9px;font-weight:700;padding:2px 7px;border-radius:10px;background:rgba(201,168,76,.2);color:var(--gold);border:1px solid rgba(201,168,76,.3);margin-left:6px;letter-spacing:.04em}
+
+@media(max-width:720px){
+  .app-body{grid-template-columns:1fr}
+  .sidebar-sticky{position:static;order:-1}
+  .g3{grid-template-columns:1fr 1fr}
+  .g4{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="header-left">
+    <div class="logo-mark">📊</div>
+    <span class="logo-text">StockAnalyzer</span>
+    <span class="logo-version">PRO v3</span>
+  </div>
+  <div class="header-right">
+    <button class="header-btn btn-ghost" onclick="loadExample()">📋 Exemple AAPL</button>
+    <button class="header-btn btn-gold" onclick="analyze()">Calculer le score →</button>
+  </div>
+</header>
+
+<div class="app-body">
+<div id="form-col">
+
+<!-- ① IDENTIFICATION -->
+<div class="panel">
+  <div class="panel-header">
+    <div class="ph-icon" style="background:#EEF2F8">🏢</div>
+    <span class="ph-title">Identification</span>
+  </div>
+  <div class="panel-body">
+    <div class="ticker-wrap">
+      <div class="ticker-main">
+        <label class="field"><span style="font-size:11px;font-weight:600;color:var(--text2)">Nom / Ticker</span>
+          <input id="ticker" class="ticker-input" type="text" placeholder="ex : Apple (AAPL)…">
+        </label>
+      </div>
+      <div class="field" style="width:180px">
+        <label>Secteur</label>
+        <select id="sector">
+          <option value="">-- Secteur --</option>
+          <option value="tech">Technologie / IA</option>
+          <option value="health">Santé / Pharma / Biotech</option>
+          <option value="finance">Finance / Banque / Assurance</option>
+          <option value="energy">Énergie / Utilities</option>
+          <option value="consumer">Consommation courante</option>
+          <option value="industrial">Industrie / Défense</option>
+          <option value="immo">Immobilier / SIIC</option>
+          <option value="telecom">Télécoms / Médias</option>
+          <option value="material">Matériaux / Ressources</option>
+          <option value="other">Autre</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="g3" style="margin-bottom:1rem">
+      <div class="field">
+        <label>Pays de cotation</label>
+        <select id="country">
+          <option value="">-- Pays --</option>
+          <option value="fr">🇫🇷 France (PEA éligible)</option>
+          <option value="eu">🇪🇺 Europe (PEA éligible)</option>
+          <option value="us">🇺🇸 États-Unis (CTO uniquement)</option>
+          <option value="other">Autre</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Capitalisation boursière</label>
+        <select id="mktcap">
+          <option value="">-- Taille --</option>
+          <option value="mega">Large Cap (&gt; 10 Md€)</option>
+          <option value="mid">Mid Cap (1–10 Md€)</option>
+          <option value="small">Small Cap (100M–1 Md€)</option>
+          <option value="micro">Micro Cap (&lt; 100 M€)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Horizon d'investissement</label>
+        <select id="horizon">
+          <option value="lt">Long terme (&gt; 5 ans)</option>
+          <option value="mt">Moyen terme (1–5 ans)</option>
+          <option value="st">Court terme (&lt; 1 an)</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="halal-row" onclick="toggleHalal()" id="halal-row">
+      <span class="halal-text">☪ Activer le filtre halal (pénalise banques, assurances, alcool, armement, jeux)</span>
+      <div class="toggle-pill" id="htoggle"><div class="toggle-knob"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ② VALORISATION -->
+<div class="panel">
+  <div class="panel-progress"><div class="panel-progress-fill" id="prog-val" style="width:0;background:var(--blue2)"></div></div>
+  <div class="panel-header">
+    <div class="ph-icon" style="background:#EBF3FD">💰</div>
+    <span class="ph-title">① Valorisation</span>
+    <span class="ph-max">20 pts</span>
+  </div>
+  <div class="panel-body">
+    <div class="sub-label">Multiples de valorisation</div>
+    <div class="g3">
+      <div class="field">
+        <label>PER <span class="tip" data-tip="Price Earnings Ratio = Cours / BPA. Mesure combien le marché paie pour 1€ de bénéfice. Comparer au secteur.">?</span></label>
+        <input id="per" type="number" step="0.1" placeholder="ex : 22" oninput="updateProg('val')">
+        <span class="hint" id="hint-per">Idéal : 10–25 selon secteur</span>
+      </div>
+      <div class="field">
+        <label>PEG Ratio <span class="tip" data-tip="PER / Taux de croissance des bénéfices. < 1 = potentiellement sous-évalué par rapport à sa croissance.">?</span></label>
+        <input id="peg" type="number" step="0.01" placeholder="ex : 1.2" oninput="updateProg('val')">
+        <span class="hint">Idéal : &lt; 1</span>
+      </div>
+      <div class="field">
+        <label>EV / EBITDA <span class="tip" data-tip="Valeur d'entreprise / EBITDA. Permet de comparer indépendamment de la structure de capital.">?</span></label>
+        <input id="ev" type="number" step="0.1" placeholder="ex : 12" oninput="updateProg('val')">
+        <span class="hint">Idéal : &lt; 15</span>
+      </div>
+      <div class="field">
+        <label>Price / Book <span class="tip" data-tip="Cours / Valeur comptable par action. < 1 peut signaler une décote sur les actifs.">?</span></label>
+        <input id="pb" type="number" step="0.1" placeholder="ex : 2.5" oninput="updateProg('val')">
+        <span class="hint">Idéal : &lt; 3</span>
+      </div>
+      <div class="field">
+        <label>Price / FCF <span class="tip" data-tip="Cours / Free Cash Flow par action. Considéré comme le ratio le plus honnête.">?</span></label>
+        <input id="pfcf" type="number" step="0.1" placeholder="ex : 20" oninput="updateProg('val')">
+        <span class="hint">Idéal : &lt; 25</span>
+      </div>
+      <div class="field">
+        <label>Price / Sales <span class="tip" data-tip="Cours / Chiffre d'affaires. Utile pour les entreprises non encore rentables.">?</span></label>
+        <input id="ps" type="number" step="0.1" placeholder="ex : 3" oninput="updateProg('val')">
+        <span class="hint">Idéal : &lt; 5</span>
+      </div>
+    </div>
+    <div class="sub-sep"></div>
+    <div class="sub-label">Par rapport aux pairs du secteur</div>
+    <div class="g2">
+      <div class="field">
+        <label>PER de l'action vs PER moyen du secteur</label>
+        <select id="per_vs">
+          <option value="">-- Sélectionner --</option>
+          <option value="2">Fortement décoté (&lt; 70% du secteur)</option>
+          <option value="1">Légèrement décoté (70–90%)</option>
+          <option value="0">En ligne avec le secteur</option>
+          <option value="-1">Prime modérée (10–30% au-dessus)</option>
+          <option value="-2">Prime élevée (&gt; 30% au-dessus)</option>
+        </select>
+        <span class="hint">Une décote par rapport au secteur = opportunité potentielle</span>
+      </div>
+      <div class="field">
+        <label>Historique valorisation (vs 5 ans passés)</label>
+        <select id="val_hist">
+          <option value="">-- Sélectionner --</option>
+          <option value="2">Fortement sous son historique</option>
+          <option value="1">Légèrement sous son historique</option>
+          <option value="0">Dans sa moyenne historique</option>
+          <option value="-1">Au-dessus de son historique</option>
+          <option value="-2">Très au-dessus (valorisation tendue)</option>
+        </select>
+        <span class="hint">Source : Macrotrends ou Finviz PE history</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ③ RENTABILITE -->
+<div class="panel">
+  <div class="panel-progress"><div class="panel-progress-fill" id="prog-rent" style="width:0;background:var(--green2)"></div></div>
+  <div class="panel-header">
+    <div class="ph-icon" style="background:#E1F5EE">📈</div>
+    <span class="ph-title">② Rentabilité</span>
+    <span class="ph-max">20 pts</span>
+  </div>
+  <div class="panel-body">
+    <div class="g3">
+      <div class="field">
+        <label>ROE (%) <span class="tip" data-tip="Return on Equity = Bénéfice net / Capitaux propres. Mesure l'efficacité à créer de la valeur pour l'actionnaire.">?</span></label>
+        <input id="roe" type="number" step="0.1" placeholder="ex : 18">
+        <span class="hint">Idéal : &gt; 15 %</span>
+      </div>
+      <div class="field">
+        <label>ROIC (%) <span class="tip" data-tip="Return on Invested Capital. L'indicateur le plus exigeant. ROIC > WACC = création de valeur réelle.">?</span></label>
+        <input id="roic" type="number" step="0.1" placeholder="ex : 12">
+        <span class="hint">Idéal : &gt; 10 %</span>
+      </div>
+      <div class="field">
+        <label>ROA (%) <span class="tip" data-tip="Return on Assets = Bénéfice net / Total actifs. Efficacité globale d'utilisation des actifs.">?</span></label>
+        <input id="roa" type="number" step="0.1" placeholder="ex : 8">
+        <span class="hint">Idéal : &gt; 5 %</span>
+      </div>
+      <div class="field">
+        <label>Marge brute (%) <span class="tip" data-tip="(CA - Coût des ventes) / CA. Reflète le pouvoir de tarification de l'entreprise.">?</span></label>
+        <input id="gm" type="number" step="0.1" placeholder="ex : 45">
+        <span class="hint">Idéal : &gt; 30 %</span>
+      </div>
+      <div class="field">
+        <label>Marge EBITDA (%) <span class="tip" data-tip="EBITDA / CA. Proxy de la rentabilité opérationnelle cash, avant effets comptables.">?</span></label>
+        <input id="ebitdam" type="number" step="0.1" placeholder="ex : 30">
+        <span class="hint">Idéal : &gt; 20 %</span>
+      </div>
+      <div class="field">
+        <label>Marge opérat. EBIT (%) <span class="tip" data-tip="EBIT / CA. Rentabilité avant intérêts et impôts.">?</span></label>
+        <input id="om" type="number" step="0.1" placeholder="ex : 20">
+        <span class="hint">Idéal : &gt; 15 %</span>
+      </div>
+      <div class="field">
+        <label>Marge nette (%) <span class="tip" data-tip="Bénéfice net / CA. Part du chiffre d'affaires réellement transformée en profit.">?</span></label>
+        <input id="nm" type="number" step="0.1" placeholder="ex : 15">
+        <span class="hint">Idéal : &gt; 10 %</span>
+      </div>
+      <div class="field">
+        <label>Marge FCF (%) <span class="tip" data-tip="Free Cash Flow / CA. La marge FCF élevée = capacité à générer du cash réel.">?</span></label>
+        <input id="fcfm" type="number" step="0.1" placeholder="ex : 18">
+        <span class="hint">Idéal : &gt; 10 %</span>
+      </div>
+      <div class="field">
+        <label>Tendance des marges (5 ans)</label>
+        <select id="margin_trend">
+          <option value="">-- Sélectionner --</option>
+          <option value="2">En amélioration constante</option>
+          <option value="1">Stables avec légère amélioration</option>
+          <option value="0">Stables</option>
+          <option value="-1">En légère compression</option>
+          <option value="-2">En forte compression</option>
+        </select>
+        <span class="hint">Tendance plus importante que le niveau absolu</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ④ CROISSANCE -->
+<div class="panel">
+  <div class="panel-progress"><div class="panel-progress-fill" id="prog-crois" style="width:0;background:var(--purple2)"></div></div>
+  <div class="panel-header">
+    <div class="ph-icon" style="background:#F3EAF9">🚀</div>
+    <span class="ph-title">③ Croissance</span>
+    <span class="ph-max">20 pts</span>
+  </div>
+  <div class="panel-body">
+    <div class="sub-label">Historique (5 ans passés)</div>
+    <div class="g3">
+      <div class="field">
+        <label>CAGR CA (%/an) <span class="tip" data-tip="Taux de croissance annuel composé du chiffre d'affaires sur 5 ans.">?</span></label>
+        <input id="rcg" type="number" step="0.1" placeholder="ex : 12">
+        <span class="hint">Idéal : &gt; 10 %</span>
+      </div>
+      <div class="field">
+        <label>CAGR BPA (%/an) <span class="tip" data-tip="Croissance annuelle du bénéfice par action sur 5 ans.">?</span></label>
+        <input id="epsg" type="number" step="0.1" placeholder="ex : 15">
+        <span class="hint">Idéal : &gt; 10 %</span>
+      </div>
+      <div class="field">
+        <label>CAGR FCF (%/an) <span class="tip" data-tip="Croissance annuelle du Free Cash Flow sur 5 ans. Le cash ne ment pas.">?</span></label>
+        <input id="fcfg" type="number" step="0.1" placeholder="ex : 10">
+        <span class="hint">Idéal : &gt; 8 %</span>
+      </div>
+    </div>
+    <div class="sub-sep"></div>
+    <div class="sub-label">Estimations analystes (forward)</div>
+    <div class="g3">
+      <div class="field">
+        <label>Croissance CA estimée N+1 (%)</label>
+        <input id="fwd_rev" type="number" step="0.1" placeholder="ex : 8">
+        <span class="hint">Source : consensus analystes (Zonebourse)</span>
+      </div>
+      <div class="field">
+        <label>Croissance BPA estimée N+1 (%)</label>
+        <input id="fwd_eps" type="number" step="0.1" placeholder="ex : 12">
+        <span class="hint">Idéal : &gt; 10 %</span>
+      </div>
+      <div class="field">
+        <label>Nb analystes qui couvrent le titre</label>
+        <input id="analysts" type="number" step="1" placeholder="ex : 25">
+        <span class="hint">Plus il y en a, meilleure est la visibilité</span>
+      </div>
+    </div>
+    <div class="sub-sep"></div>
+    <div class="g2">
+      <div class="field">
+        <label>Régularité de la croissance CA</label>
+        <select id="rev_consistency">
+          <option value="">-- Sélectionner --</option>
+          <option value="3">Très régulière (jamais de recul sur 5 ans)</option>
+          <option value="2">Globalement régulière (1 ou 2 baisses)</option>
+          <option value="1">Cyclique (plusieurs hauts et bas)</option>
+          <option value="0">Irrégulière / en déclin</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Part des revenus récurrents</label>
+        <select id="recurring">
+          <option value="">-- Sélectionner --</option>
+          <option value="3">Très élevée (&gt; 70% — SaaS, abonnements)</option>
+          <option value="2">Modérée (30–70%)</option>
+          <option value="1">Faible (&lt; 30% — transactions ponctuelles)</option>
+        </select>
+        <span class="hint">Revenus récurrents = visibilité et valorisation supérieure</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ⑤ SOLIDITE FINANCIERE -->
+<div class="panel">
+  <div class="panel-progress"><div class="panel-progress-fill" id="prog-sol" style="width:0;background:var(--amber2)"></div></div>
+  <div class="panel-header">
+    <div class="ph-icon" style="background:#FEF3DC">🛡️</div>
+    <span class="ph-title">④ Solidité Financière</span>
+    <span class="ph-max">20 pts</span>
+  </div>
+  <div class="panel-body">
+    <div class="g3">
+      <div class="field">
+        <label>Dette nette / EBITDA <span class="tip" data-tip="Levier financier. < 2x rassurant. > 4x risqué. Négatif = trésorerie nette positive.">?</span></label>
+        <input id="de" type="number" step="0.1" placeholder="ex : 1.5">
+        <span class="hint">Idéal : &lt; 2× (négatif = cash net)</span>
+      </div>
+      <div class="field">
+        <label>Ratio liquidité courante <span class="tip" data-tip="Actifs court terme / Passifs court terme. > 1.5 = bonne santé de trésorerie.">?</span></label>
+        <input id="cr" type="number" step="0.01" placeholder="ex : 2.1">
+        <span class="hint">Idéal : &gt; 1.5</span>
+      </div>
+      <div class="field">
+        <label>Ratio liquidité immédiate <span class="tip" data-tip="(Actifs CT - Stocks) / Passifs CT. Version plus stricte du ratio de liquidité.">?</span></label>
+        <input id="qr" type="number" step="0.01" placeholder="ex : 1.4">
+        <span class="hint">Idéal : &gt; 1.0</span>
+      </div>
+      <div class="field">
+        <label>Couverture des intérêts <span class="tip" data-tip="EBIT / Charges financières. > 3x = capacité confortable à rembourser la dette.">?</span></label>
+        <input id="ic" type="number" step="0.1" placeholder="ex : 8">
+        <span class="hint">Idéal : &gt; 3×</span>
+      </div>
+      <div class="field">
+        <label>FCF Yield (%) <span class="tip" data-tip="Free Cash Flow / Capitalisation boursière. > 4% = action générant beaucoup de cash.">?</span></label>
+        <input id="fcfy" type="number" step="0.1" placeholder="ex : 5">
+        <span class="hint">Idéal : &gt; 4 %</span>
+      </div>
+      <div class="field">
+        <label>Dette / Capitaux propres (D/E) <span class="tip" data-tip="Dette totale / Capitaux propres. < 1 = entreprise peu endettée.">?</span></label>
+        <input id="de_ratio" type="number" step="0.01" placeholder="ex : 0.8">
+        <span class="hint">Idéal : &lt; 1</span>
+      </div>
+    </div>
+    <div class="sub-sep"></div>
+    <div class="g2">
+      <div class="field">
+        <label>Tendance de la dette (5 ans)</label>
+        <select id="debt_trend">
+          <option value="">-- Sélectionner --</option>
+          <option value="2">En forte réduction</option>
+          <option value="1">En légère réduction</option>
+          <option value="0">Stable</option>
+          <option value="-1">En hausse modérée</option>
+          <option value="-2">En forte hausse</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Notation crédit (si disponible)</label>
+        <select id="credit_rating">
+          <option value="">-- Non disponible --</option>
+          <option value="3">AAA / AA (investment grade élevé)</option>
+          <option value="2">A / BBB (investment grade)</option>
+          <option value="1">BB (spéculatif mais solide)</option>
+          <option value="0">B ou moins (high yield / junk)</option>
+        </select>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ⑥ DIVIDENDES -->
+<div class="panel">
+  <div class="panel-progress"><div class="panel-progress-fill" id="prog-div" style="width:0;background:var(--red2)"></div></div>
+  <div class="panel-header">
+    <div class="ph-icon" style="background:#FEF0F0">💸</div>
+    <span class="ph-title">⑤ Dividendes</span>
+    <span class="ph-max">10 pts</span>
+    <span class="ph-badge" style="background:#F0FBF7;color:#0A6B4A;border:1px solid #A8DFC6;font-size:9px">Facultatif</span>
+  </div>
+  <div class="panel-body">
+    <div class="g3">
+      <div class="field">
+        <label>Rendement dividende (%) <span class="tip" data-tip="Dividende annuel / Cours. Attention : > 7% peut signaler un dividende non soutenable (yield trap).">?</span></label>
+        <input id="dy" type="number" step="0.1" placeholder="ex : 2.5">
+        <span class="hint">Idéal : 1–5 %</span>
+      </div>
+      <div class="field">
+        <label>Taux de distribution (%) <span class="tip" data-tip="Dividende / BPA. > 80% = risque que le dividende soit coupé si les résultats baissent.">?</span></label>
+        <input id="po" type="number" step="0.1" placeholder="ex : 40">
+        <span class="hint">Idéal : &lt; 60 %</span>
+      </div>
+      <div class="field">
+        <label>FCF Payout (%) <span class="tip" data-tip="Dividende / FCF par action. Plus fiable que le payout sur bénéfices comptables.">?</span></label>
+        <input id="fcfpay" type="number" step="0.1" placeholder="ex : 35">
+        <span class="hint">Idéal : &lt; 60 % (sur FCF)</span>
+      </div>
+      <div class="field">
+        <label>Croissance div. (%/an CAGR 5ans)</label>
+        <input id="dg" type="number" step="0.1" placeholder="ex : 5">
+        <span class="hint">Idéal : &gt; 5 % / Aristocrate : 25 ans+</span>
+      </div>
+      <div class="field">
+        <label>Années consécutives de hausse</label>
+        <input id="divstreak" type="number" step="1" placeholder="ex : 10">
+        <span class="hint">Aristocrate = 25+ ans. Kings = 50+ ans</span>
+      </div>
+      <div class="field">
+        <label>Rachat d'actions (buybacks) ?</label>
+        <select id="buyback">
+          <option value="">-- Sélectionner --</option>
+          <option value="2">Programme actif et régulier</option>
+          <option value="1">Occasionnel</option>
+          <option value="0">Aucun</option>
+          <option value="-1">Émissions d'actions (dilution)</option>
+        </select>
+        <span class="hint">Rachats = signal de confiance du management</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ⑦ QUALITATIF -->
+<div class="panel">
+  <div class="panel-header">
+    <div class="ph-icon" style="background:#FFF8E7">🏛</div>
+    <span class="ph-title">⑥ Qualitatif & Avantage Concurrentiel</span>
+    <span class="ph-max">15 pts</span>
+  </div>
+  <div class="panel-body">
+    <div class="sub-label">Le Moat (avantage concurrentiel)</div>
+    <div class="g2">
+      <div class="field">
+        <label>Type de moat <span class="tip" data-tip="Les douves : ce qui protège l'entreprise de la concurrence sur le long terme.">?</span></label>
+        <select id="moat_type">
+          <option value="">-- Sélectionner --</option>
+          <option value="4">Marque forte (luxe, FMCG, tech consumer)</option>
+          <option value="4">Effet réseau (Meta, Visa, Airbnb)</option>
+          <option value="4">Coûts de substitution élevés (SAP, Salesforce)</option>
+          <option value="4">Avantage de coût structurel (Amazon, Costco)</option>
+          <option value="3">Brevets / actifs intangibles (pharma, semi)</option>
+          <option value="2">Moat modéré — quelques avantages</option>
+          <option value="0">Pas de moat identifiable</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Force du moat dans 5 ans</label>
+        <select id="moat_durability">
+          <option value="">-- Sélectionner --</option>
+          <option value="2">Plus fort (avantage en renforcement)</option>
+          <option value="1">Stable</option>
+          <option value="0">En affaiblissement (disruption possible)</option>
+          <option value="-1">Fortement menacé</option>
+        </select>
+        <span class="hint">La durabilité du moat est aussi importante que sa force actuelle</span>
+      </div>
+    </div>
+    <div class="sub-sep"></div>
+    <div class="sub-label">Management & Gouvernance</div>
+    <div class="g3">
+      <div class="field">
+        <label>Qualité du management</label>
+        <select id="mgmt">
+          <option value="">-- Sélectionner --</option>
+          <option value="3">Excellent (fondateur/actionnaire, vision, track-record)</option>
+          <option value="2">Très bon (résultats cohérents, communication claire)</option>
+          <option value="1">Correct (pas de signal négatif majeur)</option>
+          <option value="0">Médiocre (rotation, dilution, opacité)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Part du management au capital</label>
+        <select id="mgmt_ownership">
+          <option value="">-- Sélectionner --</option>
+          <option value="2">Élevée (&gt; 5% — alignement fort)</option>
+          <option value="1">Modérée (1–5%)</option>
+          <option value="0">Faible (&lt; 1%)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Historique d'allocation du capital</label>
+        <select id="capital_alloc">
+          <option value="">-- Sélectionner --</option>
+          <option value="2">Excellent (acquisitions, ROIC élevé)</option>
+          <option value="1">Correct</option>
+          <option value="0">Médiocre (acquisitions destructrices)</option>
+        </select>
+      </div>
+    </div>
+    <div class="sub-sep"></div>
+    <div class="sub-label">Secteur & Positionnement</div>
+    <div class="g3">
+      <div class="field">
+        <label>Dynamique sectorielle</label>
+        <select id="sect">
+          <option value="">-- Sélectionner --</option>
+          <option value="3">Forte croissance structurelle (IA, biotech, verde)</option>
+          <option value="2">Croissance modérée</option>
+          <option value="1">Stable / défensif</option>
+          <option value="0">En déclin ou très cyclique</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Part de marché</label>
+        <select id="mktshare">
+          <option value="">-- Sélectionner --</option>
+          <option value="2">Leader (&gt; 30%)</option>
+          <option value="1">Challenger significatif</option>
+          <option value="0">Acteur marginal</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Risque de disruption</label>
+        <select id="disruption">
+          <option value="">-- Sélectionner --</option>
+          <option value="2">Très faible (secteur protégé)</option>
+          <option value="1">Modéré</option>
+          <option value="0">Élevé (secteur en mutation)</option>
+          <option value="-1">Très élevé (modèle menacé)</option>
+        </select>
+      </div>
+    </div>
+    <div class="sub-sep"></div>
+    <div class="field">
+      <label>Secteur problématique (filtre halal)</label>
+      <select id="haram">
+        <option value="0">Non — activité neutre ou positive</option>
+        <option value="1">Banque / Assurance / Finance conventionnelle</option>
+        <option value="2">Alcool / Tabac / Jeux / Armement / Contenu adulte</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<!-- ⑧ ANALYSE TECHNIQUE -->
+<div class="panel">
+  <div class="panel-header">
+    <div class="ph-icon" style="background:#E6F4FB">📊</div>
+    <span class="ph-title">⑦ Analyse Technique</span>
+    <span class="ph-max">15 pts</span>
+  </div>
+  <div class="panel-body">
+    <div class="sub-label">Valeurs numériques (depuis TradingView)</div>
+    <div class="g4">
+      <div class="field">
+        <label>Cours actuel</label>
+        <input id="price" type="number" step="0.01" placeholder="ex : 185.50">
+      </div>
+      <div class="field">
+        <label>RSI 14 périodes <span class="tip" data-tip="Relative Strength Index. > 70 = suracheté. < 30 = survendu. Zone idéale d'achat : 35–55.">?</span></label>
+        <input id="rsi" type="number" step="0.1" placeholder="ex : 48">
+        <span class="hint">Idéal achat : 35–60</span>
+      </div>
+      <div class="field">
+        <label>MM200 (Moy. Mobile 200j)</label>
+        <input id="mm200" type="number" step="0.01" placeholder="ex : 172.00">
+        <span class="hint">Cours &gt; MM200 = tendance haussière</span>
+      </div>
+      <div class="field">
+        <label>MM50 (Moy. Mobile 50j)</label>
+        <input id="mm50" type="number" step="0.01" placeholder="ex : 180.00">
+        <span class="hint">Cours &gt; MM50 = momentum</span>
+      </div>
+      <div class="field">
+        <label>Bande Bollinger haute</label>
+        <input id="bb_high" type="number" step="0.01" placeholder="ex : 195.00">
+        <span class="hint">Cours proche bande haute = suracheté</span>
+      </div>
+      <div class="field">
+        <label>Bande Bollinger basse</label>
+        <input id="bb_low" type="number" step="0.01" placeholder="ex : 175.00">
+        <span class="hint">Cours proche bande basse = potentiel rebond</span>
+      </div>
+      <div class="field">
+        <label>Support clé le plus proche</label>
+        <input id="support" type="number" step="0.01" placeholder="ex : 178.00">
+        <span class="hint">Niveau de prix plancher identifié</span>
+      </div>
+      <div class="field">
+        <label>Résistance clé la plus proche</label>
+        <input id="resist" type="number" step="0.01" placeholder="ex : 192.00">
+        <span class="hint">Niveau de prix plafond identifié</span>
+      </div>
+    </div>
+    <div class="sub-sep"></div>
+    <div class="sub-label">Questions clés (Oui / Non)</div>
+    <div style="display:flex;flex-direction:column;gap:.875rem">
+      <div class="field">
+        <label>Le MACD est-il en territoire positif ou vient-il de croiser à la hausse ? <span class="tip" data-tip="Signal haussier = ligne MACD dépasse la ligne signal vers le haut.">?</span></label>
+        <div class="yn-wrap">
+          <button class="yn-btn yes" onclick="yn(this,'t_macd','yes')">✓ Oui — signal haussier</button>
+          <button class="yn-btn no" onclick="yn(this,'t_macd','no')">✗ Non — signal baissier</button>
+        </div>
+        <input type="hidden" id="t_macd" value="">
+      </div>
+      <div class="field">
+        <label>Le volume est-il en hausse sur les séances récentes ?</label>
+        <div class="yn-wrap">
+          <button class="yn-btn yes" onclick="yn(this,'t_vol','yes')">✓ Oui — volumes croissants</button>
+          <button class="yn-btn no" onclick="yn(this,'t_vol','no')">✗ Non — volumes faibles</button>
+        </div>
+        <input type="hidden" id="t_vol" value="">
+      </div>
+      <div class="field">
+        <label>Y a-t-il une figure chartiste haussière identifiée ?</label>
+        <div class="yn-wrap">
+          <button class="yn-btn yes" onclick="yn(this,'t_chart','yes')">✓ Oui (Double Bottom, Triangle…)</button>
+          <button class="yn-btn no" onclick="yn(this,'t_chart','no')">✗ Non / figure baissière</button>
+        </div>
+        <input type="hidden" id="t_chart" value="">
+      </div>
+      <div class="field">
+        <label>L'action est-elle en phase de consolidation (range latéral) avant une cassure ?</label>
+        <div class="yn-wrap">
+          <button class="yn-btn yes" onclick="yn(this,'t_cons','yes')">✓ Oui — bon timing d'achat potentiel</button>
+          <button class="yn-btn no" onclick="yn(this,'t_cons','no')">✗ Non — déjà en forte tendance</button>
+        </div>
+        <input type="hidden" id="t_cons" value="">
+      </div>
+    </div>
+    <div class="sub-sep"></div>
+    <div class="sub-label">Niveau de risque technique</div>
+    <div class="g2">
+      <div class="field">
+        <label>Distance cours / support (risque baisse)</label>
+        <select id="t_riskreward">
+          <option value="">-- Sélectionner --</option>
+          <option value="3">Ratio R/R &gt; 3 (ex: +15% possible vs -5% risque)</option>
+          <option value="2">Ratio R/R entre 2 et 3</option>
+          <option value="1">Ratio R/R entre 1 et 2</option>
+          <option value="0">Ratio R/R &lt; 1 (risque &gt; potentiel)</option>
+        </select>
+        <span class="hint">Risk/Reward = (objectif - cours) / (cours - stop)</span>
+      </div>
+      <div class="field">
+        <label>Volatilité historique (ATR / cours)</label>
+        <select id="t_volatility">
+          <option value="">-- Sélectionner --</option>
+          <option value="2">Faible (&lt; 2%/jour — stable)</option>
+          <option value="1">Modérée (2–4%/jour)</option>
+          <option value="0">Élevée (&gt; 4%/jour — spéculatif)</option>
+        </select>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ⑨ CONTEXTE MACRO -->
+<div class="panel">
+  <div class="panel-header">
+    <div class="ph-icon" style="background:#EBF3FD">🌍</div>
+    <span class="ph-title">⑧ Contexte Macro-économique</span>
+    <span class="ph-max">10 pts</span>
+  </div>
+  <div class="panel-body">
+    <div style="display:flex;flex-direction:column;gap:1rem">
+      <div class="field">
+        <label>Environnement des taux d'intérêt <span class="tip" data-tip="Taux bas favorisent les valeurs de croissance. Taux hauts pénalisent les entreprises endettées et valorisées sur le futur.">?</span></label>
+        <div class="scale-wrap">
+          <button class="sc-btn" onclick="sc(this,'m_taux',-2)">📈<br>Très hauts</button>
+          <button class="sc-btn" onclick="sc(this,'m_taux',-1)">⬆<br>En hausse</button>
+          <button class="sc-btn" onclick="sc(this,'m_taux',0)">➡<br>Stable</button>
+          <button class="sc-btn" onclick="sc(this,'m_taux',1)">⬇<br>En baisse</button>
+          <button class="sc-btn" onclick="sc(this,'m_taux',2)">📉<br>Très bas</button>
+        </div>
+        <input type="hidden" id="m_taux" value="">
+      </div>
+      <div class="field">
+        <label>Risque de récession à 12 mois</label>
+        <div class="scale-wrap">
+          <button class="sc-btn" onclick="sc(this,'m_reces',-2)">🔴<br>Très élevé</button>
+          <button class="sc-btn" onclick="sc(this,'m_reces',-1)">🟠<br>Élevé</button>
+          <button class="sc-btn" onclick="sc(this,'m_reces',0)">🟡<br>Modéré</button>
+          <button class="sc-btn" onclick="sc(this,'m_reces',1)">🟢<br>Faible</button>
+          <button class="sc-btn" onclick="sc(this,'m_reces',2)">✅<br>Très faible</button>
+        </div>
+        <input type="hidden" id="m_reces" value="">
+        <span class="hint">En récession : surpondérer santé, utilities, alimentaire, or</span>
+      </div>
+      <div class="field">
+        <label>Sentiment général du marché (Fear & Greed)</label>
+        <div class="scale-wrap">
+          <button class="sc-btn" onclick="sc(this,'m_sent',-2)">😱<br>Panique</button>
+          <button class="sc-btn" onclick="sc(this,'m_sent',-1)">😟<br>Négatif</button>
+          <button class="sc-btn" onclick="sc(this,'m_sent',0)">😐<br>Neutre</button>
+          <button class="sc-btn" onclick="sc(this,'m_sent',1)">😊<br>Positif</button>
+          <button class="sc-btn" onclick="sc(this,'m_sent',2)">🤩<br>Euphorie</button>
+        </div>
+        <input type="hidden" id="m_sent" value="">
+        <span class="hint">🔑 Acheter dans la peur, vendre dans l'euphorie (Buffett). Euphorie = signal de prudence</span>
+      </div>
+      <div class="g2">
+        <div class="field">
+          <label>Force du dollar USD</label>
+          <div class="yn-wrap">
+            <button class="yn-btn yes" onclick="yn(this,'m_dollar','weak')">💚 Dollar faible (favorable aux multinationales)</button>
+            <button class="yn-btn no" onclick="yn(this,'m_dollar','strong')">❌ Dollar fort (pression sur exports)</button>
+          </div>
+          <input type="hidden" id="m_dollar" value="">
+        </div>
+        <div class="field">
+          <label>Contexte géopolitique général</label>
+          <div class="scale-wrap">
+            <button class="sc-btn" onclick="sc(this,'m_geo',-2)">💣<br>Très tendu</button>
+            <button class="sc-btn" onclick="sc(this,'m_geo',-1)">⚡<br>Tendu</button>
+            <button class="sc-btn" onclick="sc(this,'m_geo',0)">🌤<br>Normal</button>
+            <button class="sc-btn" onclick="sc(this,'m_geo',1)">☀<br>Calme</button>
+            <button class="sc-btn" onclick="sc(this,'m_geo',2)">🌈<br>Très calme</button>
+          </div>
+          <input type="hidden" id="m_geo" value="">
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ⑩ CATALYSEURS -->
+<div class="panel">
+  <div class="panel-header">
+    <div class="ph-icon" style="background:#E1F5EE">⚡</div>
+    <span class="ph-title">⑨ Catalyseurs & Risques Spécifiques</span>
+    <span class="ph-max">15 pts</span>
+  </div>
+  <div class="panel-body">
+    <div style="display:flex;flex-direction:column;gap:1rem">
+      <div class="field">
+        <label>Résultats trimestriels dans moins de 30 jours ? <span class="tip" data-tip="Acheter avant des résultats = risque de gap baissier en cas de déception. Mieux vaut attendre.">?</span></label>
+        <div class="yn-wrap">
+          <button class="yn-btn yes" onclick="yn(this,'c_earn','yes')">⚠ Oui — attendre les résultats</button>
+          <button class="yn-btn no" onclick="yn(this,'c_earn','no')">✓ Non — fenêtre sécurisée</button>
+        </div>
+        <input type="hidden" id="c_earn" value="">
+      </div>
+      <div class="field">
+        <label>Catalyseur positif identifié (nouveau produit, contrat majeur, rachat) ?</label>
+        <div class="yn-wrap">
+          <button class="yn-btn yes" onclick="yn(this,'c_cat','yes')">✓ Oui — catalyseur identifié</button>
+          <button class="yn-btn no" onclick="yn(this,'c_cat','no')">✗ Non — pas de catalyseur visible</button>
+        </div>
+        <input type="hidden" id="c_cat" value="">
+      </div>
+      <div class="field">
+        <label>Risques juridiques / réglementaires / géopolitiques spécifiques ?</label>
+        <div class="yn-wrap">
+          <button class="yn-btn yes" onclick="yn(this,'c_risk','yes')">✗ Oui — risque identifié</button>
+          <button class="yn-btn no" onclick="yn(this,'c_risk','no')">✓ Non — pas de risque particulier</button>
+        </div>
+        <input type="hidden" id="c_risk" value="">
+      </div>
+      <div class="field">
+        <label>Insider buying récent (management ou actionnaires importants achètent) ?</label>
+        <div class="yn-wrap">
+          <button class="yn-btn yes" onclick="yn(this,'c_insider','yes')">✓ Oui — signal positif fort</button>
+          <button class="yn-btn no" onclick="yn(this,'c_insider','no')">✗ Non / Insiders vendent</button>
+        </div>
+        <input type="hidden" id="c_insider" value="">
+        <span class="hint">Source : SEC Form 4 (US) ou déclarations AMF (France)</span>
+      </div>
+      <div class="field">
+        <label>Couverture des analystes et consensus</label>
+        <select id="c_consensus">
+          <option value="">-- Sélectionner --</option>
+          <option value="3">Majorité Acheter / Achat fort (Buy / Strong Buy)</option>
+          <option value="2">Consensus Conserver avec potentiel haussier</option>
+          <option value="1">Consensus neutre / Conserver</option>
+          <option value="0">Consensus Vendre / Sous-pondérer</option>
+        </select>
+        <span class="hint">Source : Zonebourse, MarketScreener, Bloomberg</span>
+      </div>
+      <div class="field">
+        <label>Niveau global de risque sur ce titre</label>
+        <div class="scale-wrap">
+          <button class="sc-btn" onclick="sc(this,'c_risklvl',-2)">🔴<br>Très élevé</button>
+          <button class="sc-btn" onclick="sc(this,'c_risklvl',-1)">🟠<br>Élevé</button>
+          <button class="sc-btn" onclick="sc(this,'c_risklvl',0)">🟡<br>Modéré</button>
+          <button class="sc-btn" onclick="sc(this,'c_risklvl',1)">🟢<br>Faible</button>
+          <button class="sc-btn" onclick="sc(this,'c_risklvl',2)">✅<br>Très faible</button>
+        </div>
+        <input type="hidden" id="c_risklvl" value="">
+        <span class="hint">Prendre en compte : taille, volatilité historique, concentration client, concurrence</span>
+      </div>
+      <div class="field">
+        <label>Dilution des actionnaires (émissions d'actions récentes) ?</label>
+        <div class="yn-wrap">
+          <button class="yn-btn yes" onclick="yn(this,'c_dilution','yes')">✗ Oui — dilution en cours</button>
+          <button class="yn-btn no" onclick="yn(this,'c_dilution','no')">✓ Non — pas de dilution</button>
+        </div>
+        <input type="hidden" id="c_dilution" value="">
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ⑪ SCORING ESG (BONUS) -->
+<div class="panel">
+  <div class="panel-header">
+    <div class="ph-icon" style="background:#E8F5E9">🌿</div>
+    <span class="ph-title">⑩ ESG & Durabilité</span>
+    <span class="ph-max">5 pts bonus</span>
+    <span class="ph-badge new">BONUS</span>
+  </div>
+  <div class="panel-body">
+    <div class="g3">
+      <div class="field">
+        <label>Score ESG (si disponible, /100)</label>
+        <input id="esg" type="number" step="1" min="0" max="100" placeholder="ex : 65">
+        <span class="hint">Source : MSCI ESG, Sustainalytics</span>
+      </div>
+      <div class="field">
+        <label>Risque climatique pour le secteur</label>
+        <select id="esg_climate">
+          <option value="">-- Sélectionner --</option>
+          <option value="2">Faible (tech, santé, services)</option>
+          <option value="1">Modéré</option>
+          <option value="0">Élevé (énergie fossile, ciment, chimie)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Gouvernance d'entreprise</label>
+        <select id="esg_gov">
+          <option value="">-- Sélectionner --</option>
+          <option value="2">Bonne (CA indépendant, transparence)</option>
+          <option value="1">Correcte</option>
+          <option value="0">Faible (conflits d'intérêts, opacité)</option>
+        </select>
+      </div>
+    </div>
+  </div>
+</div>
+
+<button class="btn-primary" onclick="analyze()">⚡ Calculer le score complet — Analyse Pro</button>
+<button class="btn-reset" onclick="resetAll()">↺ Réinitialiser tout le formulaire</button>
+
+</div><!-- /form-col -->
+
+<!-- ── SIDEBAR ── -->
+<div class="sidebar-sticky">
+  <div class="score-card" id="score-card">
+    <div class="sc-top">
+      <div class="sc-ticker-row">
+        <div class="sc-ticker" id="s-ticker">EN ATTENTE</div>
+        <div class="sc-sector-tag" id="s-sector">—</div>
+      </div>
+      <div class="sc-number-row">
+        <span class="sc-number" id="s-number">—</span>
+        <span class="sc-denom">/100</span>
+      </div>
+      <div class="sc-sublabel" id="s-label">Renseignez les données et calculez</div>
+    </div>
+    <div class="sc-bar-track"><div class="sc-bar-fill" id="s-bar" style="width:0;background:var(--gold)"></div></div>
+
+    <div class="sc-verdict" id="s-verdict">
+      <div class="empty">
+        <span class="empty-icon">📊</span>
+        <p>Remplissez le formulaire et cliquez sur <strong>Calculer</strong> pour obtenir votre analyse complète avec score, feux tricolores et recommandations.</p>
+      </div>
+    </div>
+
+    <div id="s-traffic" style="display:none" class="traffic-lights"></div>
+    <div id="s-reco" style="display:none"></div>
+    <div class="cats-bars" id="s-cats" style="display:none"></div>
+  </div>
+
+  <div id="s-detail" style="display:none;margin-top:1.25rem"></div>
+</div>
+
+<div class="disclaimer" style="grid-column:1/-1">
+  ⚠ Document informatif uniquement · Ne constitue pas un conseil en investissement · Tout investissement comporte un risque de perte en capital pouvant être total · Les performances passées ne préjugent pas des performances futures · Consultez un conseiller financier agréé avant toute décision
+</div>
+</div>
+
+<script>
+let halalOn=false;
+const SECTORS={'tech':'Tech / IA','health':'Santé','finance':'Finance','energy':'Énergie','consumer':'Conso.','industrial':'Industrie','immo':'Immobilier','telecom':'Télécoms','material':'Matériaux','other':'Autre',''  :'—'};
+
+function toggleHalal(){halalOn=!halalOn;document.getElementById('htoggle').classList.toggle('on',halalOn);}
+function yn(btn,id,val){btn.parentElement.querySelectorAll('.yn-btn').forEach(b=>b.classList.remove('on'));btn.classList.add('on');document.getElementById(id).value=val;}
+function sc(btn,id,val){
+  btn.parentElement.querySelectorAll('.sc-btn').forEach(b=>b.classList.remove('s-vn','s-n','s-neu','s-p','s-vp'));
+  btn.classList.add(val===-2?'s-vn':val===-1?'s-n':val===0?'s-neu':val===1?'s-p':'s-vp');
+  document.getElementById(id).value=val;
+}
+function v(id){const x=parseFloat(document.getElementById(id).value);return isNaN(x)?null:x;}
+function vs(id){return document.getElementById(id).value;}
+function vi(id){const x=parseInt(document.getElementById(id).value);return isNaN(x)?null:x;}
+
+function updateProg(cat){/* visual feedback */}
+
+function dotC(s){return s==='pos'?'#1D9E75':s==='warn'?'#EF9F27':s==='neg'?'#E24B4A':'#9AABB8';}
+function badgeS(s){
+  if(s==='pos')return'background:#E1F5EE;color:#0A6B4A';
+  if(s==='warn')return'background:#FEF3DC;color:#7A4A08';
+  if(s==='neg')return'background:#FEF0F0;color:#8B1E1E';
+  return'background:#F0EDE8;color:#5A6A7A';
+}
+function sCol(s){
+  if(s>=75)return{bar:'#1D9E75',text:'#5EDFB8',tl:'tl-green'};
+  if(s>=55)return{bar:'#3A7BD5',text:'#7EC6F0',tl:'tl-green'};
+  if(s>=40)return{bar:'#EF9F27',text:'#F8CE7A',tl:'tl-amber'};
+  return{bar:'#E24B4A',text:'#F08080',tl:'tl-red'};
+}
+
+function analyze(){
+  const ticker=document.getElementById('ticker').value.trim()||'Action';
+  const sectorKey=vs('sector');
+  let cats={};
+
+  // ── VALORISATION (max 25 pts — normalisé sur 20) ──
+  let vpts=0,vdet=[];
+  const per=v('per');if(per!==null){let p=per<10?5:per<18?5:per<25?4:per<35?2:per<50?1:0,s=per<25?'pos':per<45?'warn':'neg';vpts+=p;vdet.push({n:'PER',v:per.toFixed(1),p,max:5,s});}
+  const peg=v('peg');if(peg!==null){let p=peg<0.8?4:peg<1?4:peg<1.5?3:peg<2?2:peg<3?1:0,s=peg<1.5?'pos':peg<2.5?'warn':'neg';vpts+=p;vdet.push({n:'PEG',v:peg.toFixed(2),p,max:4,s});}
+  const ev=v('ev');if(ev!==null){let p=ev<8?4:ev<12?4:ev<18?3:ev<25?2:ev<35?1:0,s=ev<15?'pos':ev<28?'warn':'neg';vpts+=p;vdet.push({n:'EV/EBITDA',v:ev.toFixed(1)+'×',p,max:4,s});}
+  const pb=v('pb');if(pb!==null){let p=pb<1.5?2:pb<3?2:pb<5?1:0,s=pb<3?'pos':pb<6?'warn':'neg';vpts+=p;vdet.push({n:'P/Book',v:pb.toFixed(1),p,max:2,s});}
+  const pfcf=v('pfcf');if(pfcf!==null){let p=pfcf<12?4:pfcf<20?3:pfcf<30?2:pfcf<40?1:0,s=pfcf<22?'pos':pfcf<38?'warn':'neg';vpts+=p;vdet.push({n:'P/FCF',v:pfcf.toFixed(1),p,max:4,s});}
+  const ps=v('ps');if(ps!==null){let p=ps<1.5?3:ps<4?2:ps<8?1:0,s=ps<4?'pos':ps<8?'warn':'neg';vpts+=p;vdet.push({n:'P/Sales',v:ps.toFixed(1),p,max:3,s});}
+  const pv=vs('per_vs');if(pv){let p=parseInt(pv)||0;p=Math.max(0,p);vpts+=p;vdet.push({n:'PER vs secteur',v:p===2?'Fortement décoté':p===1?'Légèrement décoté':p===0?'En ligne':'Prime',p,max:2,s:p>=1?'pos':p===0?'warn':'neg'});}
+  const vh=vs('val_hist');if(vh){let p=parseInt(vh)||0;p=Math.max(0,p);vpts+=p;vdet.push({n:'Valorisation historique',v:p>=1?'Sous histor.':'Dans/au-dessus',p,max:2,s:p>=1?'pos':p===0?'warn':'neg'});}
+  cats['Valorisation']={pts:Math.min(vpts,20),max:20,det:vdet,color:'#3A7BD5'};
+
+  // ── RENTABILITE (max 30 pts → norm 20) ──
+  let rpts=0,rdet=[];
+  const roe=v('roe');if(roe!==null){let p=roe>30?5:roe>20?5:roe>15?4:roe>10?2:roe>5?1:0,s=roe>15?'pos':roe>5?'warn':'neg';rpts+=p;rdet.push({n:'ROE',v:roe.toFixed(1)+'%',p,max:5,s});}
+  const roic=v('roic');if(roic!==null){let p=roic>20?5:roic>15?4:roic>10?3:roic>5?1.5:0,s=roic>12?'pos':roic>6?'warn':'neg';rpts+=p;rdet.push({n:'ROIC',v:roic.toFixed(1)+'%',p,max:5,s});}
+  const roa=v('roa');if(roa!==null){let p=roa>10?3:roa>5?2:roa>2?1:0,s=roa>6?'pos':roa>2?'warn':'neg';rpts+=p;rdet.push({n:'ROA',v:roa.toFixed(1)+'%',p,max:3,s});}
+  const gm=v('gm');if(gm!==null){let p=gm>55?4:gm>40?3:gm>25?2:gm>10?1:0,s=gm>35?'pos':gm>15?'warn':'neg';rpts+=p;rdet.push({n:'Marge brute',v:gm.toFixed(1)+'%',p,max:4,s});}
+  const ebitdam=v('ebitdam');if(ebitdam!==null){let p=ebitdam>30?3:ebitdam>20?2:ebitdam>10?1:0,s=ebitdam>20?'pos':ebitdam>10?'warn':'neg';rpts+=p;rdet.push({n:'Marge EBITDA',v:ebitdam.toFixed(1)+'%',p,max:3,s});}
+  const om=v('om');if(om!==null){let p=om>25?3:om>15?2:om>8?1:0,s=om>15?'pos':om>8?'warn':'neg';rpts+=p;rdet.push({n:'Marge opérat.',v:om.toFixed(1)+'%',p,max:3,s});}
+  const nm=v('nm');if(nm!==null){let p=nm>20?4:nm>12?3:nm>6?2:nm>0?1:0,s=nm>12?'pos':nm>5?'warn':'neg';rpts+=p;rdet.push({n:'Marge nette',v:nm.toFixed(1)+'%',p,max:4,s});}
+  const fcfm=v('fcfm');if(fcfm!==null){let p=fcfm>20?3:fcfm>12?2:fcfm>5?1:0,s=fcfm>12?'pos':fcfm>5?'warn':'neg';rpts+=p;rdet.push({n:'Marge FCF',v:fcfm.toFixed(1)+'%',p,max:3,s});}
+  const mt=vs('margin_trend');if(mt){let val=parseInt(mt)||0;let p=Math.max(0,val+2)*0.5;rpts+=p;rdet.push({n:'Tendance marges',v:val>=1?'En amélioration':val===0?'Stable':'En compression',p,max:2,s:val>=1?'pos':val===0?'warn':'neg'});}
+  cats['Rentabilité']={pts:Math.min(rpts,20),max:20,det:rdet,color:'#1D9E75'};
+
+  // ── CROISSANCE (max 30 pts → norm 20) ──
+  let cpts=0,cdet=[];
+  const rcg=v('rcg');if(rcg!==null){let p=rcg>25?7:rcg>15?6:rcg>10?5:rcg>5?3:rcg>0?1:0,s=rcg>10?'pos':rcg>0?'warn':'neg';cpts+=p;cdet.push({n:'CAGR CA',v:rcg.toFixed(1)+'%/an',p,max:7,s});}
+  const epsg=v('epsg');if(epsg!==null){let p=epsg>25?7:epsg>15?6:epsg>10?5:epsg>5?3:epsg>0?1:0,s=epsg>10?'pos':epsg>0?'warn':'neg';cpts+=p;cdet.push({n:'CAGR BPA',v:epsg.toFixed(1)+'%/an',p,max:7,s});}
+  const fcfg=v('fcfg');if(fcfg!==null){let p=fcfg>20?6:fcfg>12?5:fcfg>8?4:fcfg>3?2:fcfg>0?1:0,s=fcfg>8?'pos':fcfg>0?'warn':'neg';cpts+=p;cdet.push({n:'CAGR FCF',v:fcfg.toFixed(1)+'%/an',p,max:6,s});}
+  const fwdr=v('fwd_rev');if(fwdr!==null){let p=fwdr>15?3:fwdr>8?2:fwdr>0?1:0,s=fwdr>8?'pos':fwdr>0?'warn':'neg';cpts+=p;cdet.push({n:'Crois. CA N+1 (est.)',v:fwdr.toFixed(1)+'%',p,max:3,s});}
+  const fwde=v('fwd_eps');if(fwde!==null){let p=fwde>15?3:fwde>8?2:fwde>0?1:0,s=fwde>8?'pos':fwde>0?'warn':'neg';cpts+=p;cdet.push({n:'Crois. BPA N+1 (est.)',v:fwde.toFixed(1)+'%',p,max:3,s});}
+  const rc=vs('rev_consistency');if(rc){let p=parseInt(rc)||0;cpts+=p;cdet.push({n:'Régularité CA',v:p===3?'Très régulière':p===2?'Globalement':p===1?'Cyclique':'Irrégulière',p,max:3,s:p>=2?'pos':p===1?'warn':'neg'});}
+  const rec=vs('recurring');if(rec){let p=parseInt(rec)||0;cpts+=p;cdet.push({n:'Revenus récurrents',v:p===3?'Très élevés (&gt;70%)':p===2?'Modérés':'Faibles',p,max:3,s:p>=2?'pos':p===1?'warn':'neg'});}
+  cats['Croissance']={pts:Math.min(cpts,20),max:20,det:cdet,color:'#9B59B6'};
+
+  // ── SOLIDITE (max 30 pts → norm 20) ──
+  let spts=0,sdet=[];
+  const de=v('de');if(de!==null){let p=de<-1?8:de<0?8:de<1?7:de<2?6:de<3?4:de<4?2:0,s=de<2?'pos':de<4?'warn':'neg';spts+=p;sdet.push({n:'Dette nette/EBITDA',v:de.toFixed(1)+'×',p,max:8,s});}
+  const cr=v('cr');if(cr!==null){let p=cr>2.5?5:cr>2?4:cr>1.5?3:cr>1?1:0,s=cr>1.5?'pos':cr>1?'warn':'neg';spts+=p;sdet.push({n:'Ratio liquidité cour.',v:cr.toFixed(2),p,max:5,s});}
+  const qr=v('qr');if(qr!==null){let p=qr>1.5?3:qr>1?2:qr>0.7?1:0,s=qr>1?'pos':qr>0.7?'warn':'neg';spts+=p;sdet.push({n:'Ratio liquidité imm.',v:qr.toFixed(2),p,max:3,s});}
+  const ic=v('ic');if(ic!==null){let p=ic>10?5:ic>6?4:ic>3?2:ic>1.5?1:0,s=ic>5?'pos':ic>3?'warn':'neg';spts+=p;sdet.push({n:'Couv. intérêts',v:ic.toFixed(1)+'×',p,max:5,s});}
+  const fcfy=v('fcfy');if(fcfy!==null){let p=fcfy>7?4:fcfy>4?3:fcfy>2?2:fcfy>0?1:0,s=fcfy>4?'pos':fcfy>2?'warn':'neg';spts+=p;sdet.push({n:'FCF Yield',v:fcfy.toFixed(1)+'%',p,max:4,s});}
+  const der=v('de_ratio');if(der!==null){let p=der<0.3?3:der<0.7?2:der<1.5?1:0,s=der<1?'pos':der<2?'warn':'neg';spts+=p;sdet.push({n:'D/E Ratio',v:der.toFixed(2),p,max:3,s});}
+  const dt=vs('debt_trend');if(dt){let p=parseInt(dt)||0;p=Math.max(0,p);spts+=p;sdet.push({n:'Tendance dette',v:p===2?'En forte réduction':p===1?'En réduction':p===0?'Stable':'En hausse',p,max:2,s:p>=1?'pos':p===0?'warn':'neg'});}
+  const cr2=vs('credit_rating');if(cr2){let p=parseInt(cr2)||0;spts+=p;sdet.push({n:'Notation crédit',v:p===3?'AAA/AA':p===2?'A/BBB':p===1?'BB':'B ou moins',p,max:3,s:p>=2?'pos':p===1?'warn':'neg'});}
+  cats['Solidité financière']={pts:Math.min(spts,20),max:20,det:sdet,color:'#E67E22'};
+
+  // ── DIVIDENDES (max 25 pts → norm 10) ──
+  let dpts=0,ddet=[];
+  const dy=v('dy');if(dy!==null){let p=(dy>=1.5&&dy<=5)?4:(dy>0.5&&dy<1.5)?3:(dy>5&&dy<=7)?2:dy>7?0:1,s=(dy>=1&&dy<=5)?'pos':dy>7?'neg':'warn';dpts+=p;ddet.push({n:'Rendement',v:dy.toFixed(1)+'%',p,max:4,s});}
+  const po=v('po');if(po!==null){let p=(po>5&&po<45)?3:(po<60)?2:po<75?1:0,s=po<55?'pos':po<75?'warn':'neg';dpts+=p;ddet.push({n:'Taux distribution',v:po.toFixed(0)+'%',p,max:3,s});}
+  const fcfpay=v('fcfpay');if(fcfpay!==null){let p=(fcfpay>5&&fcfpay<45)?3:fcfpay<65?2:fcfpay<80?1:0,s=fcfpay<55?'pos':fcfpay<75?'warn':'neg';dpts+=p;ddet.push({n:'FCF Payout',v:fcfpay.toFixed(0)+'%',p,max:3,s});}
+  const dg=v('dg');if(dg!==null){let p=dg>10?5:dg>7?4:dg>5?3:dg>2?2:dg>0?1:0,s=dg>5?'pos':dg>0?'warn':'neg';dpts+=p;ddet.push({n:'CAGR dividende',v:dg.toFixed(1)+'%/an',p,max:5,s});}
+  const ds=v('divstreak');if(ds!==null){let p=ds>=25?5:ds>=10?3:ds>=5?2:ds>=1?1:0,s=ds>=25?'pos':ds>=5?'warn':'neg';dpts+=p;ddet.push({n:'Streak div.',v:ds+' ans',p,max:5,s});}
+  const bb=vs('buyback');if(bb){let val=parseInt(bb)||0;let p=Math.max(0,val);dpts+=p;ddet.push({n:'Rachats actions',v:val===2?'Programme actif':val===1?'Occasionnel':val===0?'Aucun':'Dilution ✗',p,max:2,s:val>=1?'pos':val===0?'warn':'neg'});}
+  cats['Dividendes']={pts:Math.min(dpts,10),max:10,det:ddet,color:'#E24B4A'};
+
+  // ── QUALITATIF (max 25 pts → norm 15) ──
+  let qpts=0,qdet=[];
+  const mt2=vs('moat_type');if(mt2){let p=parseInt(mt2)||0;qpts+=p;qdet.push({n:'Type de moat',v:p===4?'Fort':p===3?'Brevets/IP':p===2?'Moyen':'Faible',p,max:4,s:p>=3?'pos':p===2?'warn':'neg'});}
+  const md=vs('moat_durability');if(md){let val=parseInt(md)||0;let p=Math.max(0,val+1);qpts+=p;qdet.push({n:'Durabilité moat',v:val===2?'En renforcement':val===1?'Stable':val===0?'S\'affaiblit':'Très menacé',p,max:3,s:val>=1?'pos':val===0?'warn':'neg'});}
+  const mg=vs('mgmt');if(mg){let p=parseInt(mg)||0;qpts+=p;qdet.push({n:'Management',v:p===3?'Excellent':p===2?'Très bon':p===1?'Correct':'Médiocre',p,max:3,s:p>=2?'pos':p===1?'warn':'neg'});}
+  const mo=vs('mgmt_ownership');if(mo){let p=parseInt(mo)||0;qpts+=p;qdet.push({n:'Ownership',v:p===2?'Fort (&gt;5%)':p===1?'Modéré':'Faible',p,max:2,s:p===2?'pos':p===1?'warn':'neg'});}
+  const ca=vs('capital_alloc');if(ca){let p=parseInt(ca)||0;qpts+=p;qdet.push({n:'Alloc. capital',v:p===2?'Excellent':p===1?'Correct':'Médiocre',p,max:2,s:p===2?'pos':p===1?'warn':'neg'});}
+  const sec=vs('sect');if(sec){let p=parseInt(sec)||0;qpts+=p;qdet.push({n:'Dynamique secteur',v:p===3?'Forte crois.':p===2?'Modérée':p===1?'Stable':'Déclin',p,max:3,s:p>=2?'pos':p===1?'warn':'neg'});}
+  const ms=vs('mktshare');if(ms){let p=parseInt(ms)||0;qpts+=p;qdet.push({n:'Part de marché',v:p===2?'Leader':p===1?'Challenger':'Marginal',p,max:2,s:p===2?'pos':p===1?'warn':'neg'});}
+  const dis=vs('disruption');if(dis){let val=parseInt(dis)||0;let p=Math.max(0,val+1);qpts+=p;qdet.push({n:'Risque disruption',v:val===2?'Très faible':val===1?'Modéré':val===0?'Élevé':'Très élevé',p,max:3,s:val>=1?'pos':val===0?'warn':'neg'});}
+  cats['Qualitatif']={pts:Math.min(qpts,15),max:15,det:qdet,color:'#C9A84C'};
+
+  // ── TECHNIQUE (max 25 pts → norm 15) ──
+  let tpts=0,tdet=[];
+  const rsi=v('rsi');if(rsi!==null){let p=rsi>=38&&rsi<=62?5:rsi>=28&&rsi<38||rsi>62&&rsi<=72?3:rsi>=20&&rsi<28||rsi>72&&rsi<=80?1:0,s=rsi>=38&&rsi<=62?'pos':rsi>=25&&rsi<=75?'warn':'neg';tpts+=p;tdet.push({n:'RSI',v:rsi.toFixed(1),p,max:5,s});}
+  const price=v('price'),mm200=v('mm200'),mm50=v('mm50');
+  if(price!==null&&mm200!==null){const a=price>mm200;tpts+=a?3:0;tdet.push({n:'Cours vs MM200',v:a?'Au-dessus ✓':'En-dessous ✗',p:a?3:0,max:3,s:a?'pos':'neg'});}
+  if(price!==null&&mm50!==null){const a=price>mm50;tpts+=a?2:0;tdet.push({n:'Cours vs MM50',v:a?'Au-dessus ✓':'En-dessous ✗',p:a?2:0,max:2,s:a?'pos':'warn'});}
+  if(mm50!==null&&mm200!==null){const gc=mm50>mm200;tpts+=gc?2:0;tdet.push({n:'Golden Cross',v:gc?'MM50>MM200 ✓':'MM50<MM200',p:gc?2:0,max:2,s:gc?'pos':'warn'});}
+  // Bollinger
+  const bbh=v('bb_high'),bbl=v('bb_low'),sup=v('support'),res=v('resist');
+  if(price!==null&&bbh!==null&&bbl!==null){const mid=(bbh+bbl)/2;const inLower=price<mid;tpts+=inLower?1:0;tdet.push({n:'Position Bollinger',v:inLower?'Zone basse (achat)':'Zone haute',p:inLower?1:0,max:1,s:inLower?'pos':'warn'});}
+  // Risk/Reward
+  if(price!==null&&sup!==null&&res!==null){const rr=(res-price)/(price-sup);const p=rr>=3?2:rr>=2?1:0,s=rr>=2?'pos':rr>=1?'warn':'neg';tpts+=p;tdet.push({n:'Risk/Reward',v:rr>0?rr.toFixed(1)+'×':'N/A',p,max:2,s});}
+  const tm=vs('t_macd');if(tm){const p=tm==='yes'?2:0;tpts+=p;tdet.push({n:'MACD',v:tm==='yes'?'Haussier ✓':'Baissier ✗',p,max:2,s:tm==='yes'?'pos':'neg'});}
+  const tv=vs('t_vol');if(tv){const p=tv==='yes'?1:0;tpts+=p;tdet.push({n:'Volumes',v:tv==='yes'?'En hausse ✓':'En baisse',p,max:1,s:tv==='yes'?'pos':'warn'});}
+  const tc=vs('t_chart');if(tc){const p=tc==='yes'?1:0;tpts+=p;tdet.push({n:'Figure chartiste',v:tc==='yes'?'Haussière ✓':'Neutre/baissière',p,max:1,s:tc==='yes'?'pos':'warn'});}
+  const tco=vs('t_cons');if(tco){const p=tco==='yes'?1:0;tpts+=p;tdet.push({n:'Consolidation',v:tco==='yes'?'Oui ✓ (timing)':'Non',p,max:1,s:tco==='yes'?'pos':'warn'});}
+  const trr=vs('t_riskreward');if(trr){const p=parseInt(trr)||0;tpts+=p;tdet.push({n:'R/R global',v:p===3?'Excellent':p===2?'Bon':p===1?'Acceptable':'Mauvais',p,max:3,s:p>=2?'pos':p===1?'warn':'neg'});}
+  const tvol=vs('t_volatility');if(tvol){const p=parseInt(tvol)||0;tpts+=p;tdet.push({n:'Volatilité',v:p===2?'Faible':p===1?'Modérée':'Élevée',p,max:2,s:p===2?'pos':p===1?'warn':'neg'});}
+  cats['Technique']={pts:Math.min(tpts,15),max:15,det:tdet,color:'#1ABFBF'};
+
+  // ── MACRO (max 15 pts → norm 10) ──
+  let mpts=0,mdet=[];
+  const mtaux=vs('m_taux');if(mtaux!==''){const val=parseInt(mtaux);const p=val===2?3:val===1?2:val===0?1:0;mpts+=p;mdet.push({n:'Taux d\'intérêt',v:val===2?'Très bas ✓':val===1?'En baisse':val===0?'Stable':'Élevés ✗',p,max:3,s:val>=1?'pos':val===0?'warn':'neg'});}
+  const mreces=vs('m_reces');if(mreces!==''){const val=parseInt(mreces);const p=val===2?3:val===1?2:val===0?1:0;mpts+=p;mdet.push({n:'Risque récession',v:val===2?'Très faible ✓':val===1?'Faible':val===0?'Modéré':'Élevé ✗',p,max:3,s:val>=1?'pos':val===0?'warn':'neg'});}
+  const msent=vs('m_sent');if(msent!==''){const val=parseInt(msent);const p=val===0?2:val===1?2:val===2?0:val===-1?1:0;mpts+=p;mdet.push({n:'Sentiment marché',v:val===2?'Euphorie ⚠':val===1?'Positif':val===0?'Neutre ✓':val===-1?'Négatif':'Panique',p,max:2,s:val===0||val===1?'pos':val===2?'neg':'warn'});}
+  const mdol=vs('m_dollar');if(mdol){const p=mdol==='weak'?2:0;mpts+=p;mdet.push({n:'Dollar',v:mdol==='weak'?'Faible (favorable)':'Fort ⚠',p,max:2,s:mdol==='weak'?'pos':'warn'});}
+  const mgeo=vs('m_geo');if(mgeo!==''){const val=parseInt(mgeo);const p=val===2?2:val===1?2:val===0?1:0;mpts+=p;mdet.push({n:'Géopolitique',v:val>=1?'Calme ✓':val===0?'Normal':'Tendu ✗',p,max:2,s:val>=1?'pos':val===0?'warn':'neg'});}
+  cats['Macro']={pts:Math.min(mpts,10),max:10,det:mdet,color:'#3A9BD5'};
+
+  // ── CATALYSEURS (max 25 pts → norm 15) ──
+  let kpts=0,kdet=[];
+  const ce=vs('c_earn');if(ce){const p=ce==='no'?3:0;kpts+=p;kdet.push({n:'Résultats imminents',v:ce==='yes'?'Oui ⚠ Attendre':'Non ✓ Fenêtre libre',p,max:3,s:ce==='no'?'pos':'warn'});}
+  const cc=vs('c_cat');if(cc){const p=cc==='yes'?4:0;kpts+=p;kdet.push({n:'Catalyseur positif',v:cc==='yes'?'Identifié ✓':'Aucun',p,max:4,s:cc==='yes'?'pos':'warn'});}
+  const crisk=vs('c_risk');if(crisk){const p=crisk==='no'?3:0;kpts+=p;kdet.push({n:'Risques juridiques',v:crisk==='yes'?'Identifiés ✗':'Aucun ✓',p,max:3,s:crisk==='no'?'pos':'neg'});}
+  const ci=vs('c_insider');if(ci){const p=ci==='yes'?3:0;kpts+=p;kdet.push({n:'Insider buying',v:ci==='yes'?'Achètent ✓':'Vendent / Aucun',p,max:3,s:ci==='yes'?'pos':'warn'});}
+  const ccon=vs('c_consensus');if(ccon){const p=parseInt(ccon)||0;kpts+=p;kdet.push({n:'Consensus analystes',v:p===3?'Achat fort ✓':p===2?'Positif':p===1?'Neutre':'Vendre ✗',p,max:3,s:p>=2?'pos':p===1?'warn':'neg'});}
+  const crl=vs('c_risklvl');if(crl!==''){const val=parseInt(crl)||0;const p=val===2?3:val===1?2:val===0?1:0;kpts+=p;kdet.push({n:'Niveau risque',v:val===2?'Très faible ✓':val===1?'Faible':val===0?'Modéré':'Élevé ✗',p,max:3,s:val>=1?'pos':val===0?'warn':'neg'});}
+  const cdil=vs('c_dilution');if(cdil){const p=cdil==='no'?3:0;kpts+=p;kdet.push({n:'Dilution',v:cdil==='yes'?'En cours ✗':'Aucune ✓',p,max:3,s:cdil==='no'?'pos':'neg'});}
+  cats['Catalyseurs']={pts:Math.min(kpts,15),max:15,det:kdet,color:'#E9845E'};
+
+  // ── ESG BONUS (max 5 pts) ──
+  let epts=0,edet=[];
+  const esg=v('esg');if(esg!==null){let p=esg>70?3:esg>50?2:esg>30?1:0,s=esg>60?'pos':esg>40?'warn':'neg';epts+=p;edet.push({n:'Score ESG',v:esg+'/100',p,max:3,s});}
+  const ec=vs('esg_climate');if(ec){let p=parseInt(ec)||0;epts+=p;edet.push({n:'Risque climatique',v:p===2?'Faible':p===1?'Modéré':'Élevé',p,max:2,s:p===2?'pos':p===1?'warn':'neg'});}
+  cats['ESG (bonus)']={pts:Math.min(epts,5),max:5,det:edet,color:'#52A352'};
+
+  // ── PÉNALITÉ HALAL ──
+  let halalPenalty=0;
+  if(halalOn){const hs=parseInt(vs('haram'))||0;if(hs===1)halalPenalty=15;if(hs===2)halalPenalty=40;}
+
+  // ── PEA BONUS ──
+  let peaBonus=0;
+  const country=vs('country');
+  if(country==='fr'||country==='eu')peaBonus=2;
+
+  // ── SCORE FINAL ──
+  let tot=0,maxTot=0;
+  for(const[k,c]of Object.entries(cats)){if(k!=='ESG (bonus)'){tot+=c.pts;maxTot+=c.max;}else{tot+=c.pts;}}
+  maxTot+=5;// ESG max
+  const base=Math.round((tot/maxTot)*100);
+  const rawScore=base+peaBonus-halalPenalty;
+  const score=Math.max(0,Math.min(100,rawScore));
+  const col=sCol(score);
+
+  // ── VERDICT ──
+  let verdict,advice,recoClass,recoTags;
+  if(score>=80){
+    verdict='⭐ Opportunité forte';
+    advice='Tous les feux sont au vert. Fondamentaux solides, technique favorable, contexte porteur. Définissez votre taille de position (max 10%) et entrez progressivement (DCA sur 2-3 semaines).';
+    recoClass='reco-buy';
+    recoTags=['✓ Acheter','DCA conseillé','Stop-loss à -8%'];
+  }else if(score>=65){
+    verdict='👍 Intéressant';
+    advice='Profil de qualité avec quelques points à surveiller. Vérifiez le point d\'entrée technique et attendez une confirmation avant d\'acheter.';
+    recoClass='reco-watch';
+    recoTags=['Surveiller','Confirmer technique','Position modérée'];
+  }else if(score>=50){
+    verdict='⚠ Neutre — Watchlist';
+    advice='Des atouts existent mais des faiblesses persistent. Mettre en watchlist et réévaluer sur les prochains résultats.';
+    recoClass='reco-wait';
+    recoTags=['Watchlist','Attendre amélioration','Position très limitée'];
+  }else if(score>=35){
+    verdict='👎 Médiocre';
+    advice='Trop de signaux négatifs pour justifier un investissement. Ne pas se positionner sauf catalyseur exceptionnel identifié.';
+    recoClass='reco-avoid';
+    recoTags=['Éviter','Surveiller uniquement','Risque élevé'];
+  }else{
+    verdict='❌ À éviter';
+    advice='Fondamentaux insuffisants. Risque de perte en capital significatif. Des alternatives bien meilleures existent.';
+    recoClass='reco-avoid';
+    recoTags=['Ne pas acheter','Risque très élevé','Cherchez mieux'];
+  }
+  if(halalOn&&halalPenalty>0)advice+=` ⚠ Pénalité halal appliquée (-${halalPenalty} pts).`;
+  if(peaBonus>0)advice+=` +${peaBonus} pts bonus PEA.`;
+
+  // FEUX TRICOLORES
+  const fondPts=cats['Valorisation'].pts+cats['Rentabilité'].pts+cats['Croissance'].pts+cats['Solidité financière'].pts;
+  const fondMax=80;
+  const fondPct=Math.round((fondPts/fondMax)*100);
+  const techPct=cats['Technique'].max>0?Math.round((cats['Technique'].pts/cats['Technique'].max)*100):null;
+  const macroPct=Math.round(((cats['Macro'].pts+cats['Catalyseurs'].pts)/25)*100);
+  const qualPct=Math.round((cats['Qualitatif'].pts/cats['Qualitatif'].max)*100);
+  const divPct=Math.round((cats['Dividendes'].pts/cats['Dividendes'].max)*100);
+
+  function tlClass(p){return p===null?'tl-grey':p>=60?'tl-green':p>=40?'tl-amber':'tl-red';}
+  function tlEmoji(p){return p===null?'⚪':p>=60?'🟢':p>=40?'🟡':'🔴';}
+
+  const trafficHtml=`
+    <div class="tl ${tlClass(fondPct)}"><span class="tl-icon">🏛</span><div class="tl-name">Fondamentaux</div><div class="tl-val">${tlEmoji(fondPct)} ${fondPct}%</div></div>
+    <div class="tl ${tlClass(techPct)}"><span class="tl-icon">📊</span><div class="tl-name">Technique</div><div class="tl-val">${tlEmoji(techPct)} ${techPct!==null?techPct+'%':'N/A'}</div></div>
+    <div class="tl ${tlClass(macroPct)}"><span class="tl-icon">🌍</span><div class="tl-name">Macro</div><div class="tl-val">${tlEmoji(macroPct)} ${macroPct}%</div></div>
+    <div class="tl ${tlClass(qualPct)}"><span class="tl-icon">🏆</span><div class="tl-name">Qualitatif</div><div class="tl-val">${tlEmoji(qualPct)} ${qualPct}%</div></div>
+    <div class="tl ${tlClass(divPct)}"><span class="tl-icon">💰</span><div class="tl-name">Dividendes</div><div class="tl-val">${tlEmoji(divPct)} ${divPct}%</div></div>
+    <div class="tl ${score>=65?'tl-green':score>=45?'tl-amber':'tl-red'}"><span class="tl-icon">⚡</span><div class="tl-name">Score global</div><div class="tl-val">${score>=65?'🟢':score>=45?'🟡':'🔴'} ${score}/100</div></div>`;
+
+  // CATS BARS
+  const catColors2={...Object.fromEntries(Object.entries(cats).map(([k,c])=>[k,c.color]))};
+  let catsHtml='';
+  for(const[name,cat]of Object.entries(cats)){
+    if(cat.max===0)continue;
+    const pct=Math.round((cat.pts/cat.max)*100);
+    catsHtml+=`<div class="cat-row"><div class="cat-name">${name}</div><div class="cat-track"><div class="cat-fill" style="width:${pct}%;background:${cat.color}"></div></div><div class="cat-pts">${Math.round(cat.pts)}/${cat.max}</div></div>`;
+  }
+
+  // DETAIL
+  let detHtml='';
+  for(const[name,cat]of Object.entries(cats)){
+    if(!cat.det||cat.det.length===0)continue;
+    detHtml+=`<div class="bk-section"><div class="bk-title"><div class="bk-title-dot" style="background:${cat.color}"></div>${name}</div>`;
+    for(const d of cat.det){
+      detHtml+=`<div class="bk-row"><div class="bk-dot" style="background:${dotC(d.s)}"></div><div class="bk-name">${d.n}</div><div class="bk-val">${d.v}</div><div class="bk-badge" style="${badgeS(d.s)}">${Math.round(d.p)} pts</div></div>`;
+    }
+    detHtml+='</div>';
+  }
+
+  // ── RENDU ──
+  document.getElementById('s-ticker').innerHTML=ticker.toUpperCase()+(halalOn?'<span class="halal-badge">☪ Halal</span>':'')+(peaBonus>0?'<span class="halal-badge" style="background:rgba(29,158,117,.2);color:#5EDFB8;border-color:rgba(29,158,117,.3)">PEA</span>':'');
+  document.getElementById('s-sector').textContent=SECTORS[sectorKey]||'—';
+  document.getElementById('s-number').textContent=score;
+  document.getElementById('s-number').style.color=col.text;
+  document.getElementById('s-label').textContent='Score global — Analyse Pro';
+  document.getElementById('s-bar').style.width=score+'%';
+  document.getElementById('s-bar').style.background=col.bar;
+  document.getElementById('s-verdict').innerHTML=`<div class="sc-verdict-title" style="color:${col.text}">${verdict}</div><div class="sc-verdict-text">${advice}</div>`;
+
+  const traf=document.getElementById('s-traffic');
+  traf.innerHTML=trafficHtml;traf.style.display='grid';
+
+  const reco=document.getElementById('s-reco');
+  reco.innerHTML=`<div class="reco-box ${recoClass}" style="margin:0 1.5rem 1rem"><div class="reco-title" style="color:${col.text}">Recommandation</div><div class="reco-actions">${recoTags.map(t=>`<span class="reco-tag">${t}</span>`).join('')}</div></div>`;
+  reco.style.display='block';
+
+  document.getElementById('s-cats').innerHTML=catsHtml;
+  document.getElementById('s-cats').style.display='block';
+
+  const det=document.getElementById('s-detail');
+  det.innerHTML=`<div class="panel"><div class="panel-header"><div class="ph-icon" style="background:#EEF2F8">🔍</div><span class="ph-title">Détail par indicateur</span></div><div class="panel-body breakdown">${detHtml}</div></div>`;
+  det.style.display='block';
+
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function resetAll(){
+  document.querySelectorAll('input[type=number],input[type=text]').forEach(i=>i.value='');
+  document.querySelectorAll('select').forEach(s=>s.selectedIndex=0);
+  document.querySelectorAll('input[type=hidden]').forEach(i=>i.value='');
+  document.querySelectorAll('.yn-btn').forEach(b=>b.classList.remove('on'));
+  document.querySelectorAll('.sc-btn').forEach(b=>b.classList.remove('s-vn','s-n','s-neu','s-p','s-vp'));
+  halalOn=false;
+  document.getElementById('htoggle').classList.remove('on');
+  document.getElementById('s-ticker').textContent='EN ATTENTE';
+  document.getElementById('s-number').textContent='—';
+  document.getElementById('s-number').style.color='#fff';
+  document.getElementById('s-label').textContent='Renseignez les données et calculez';
+  document.getElementById('s-bar').style.width='0';
+  document.getElementById('s-verdict').innerHTML='<div class="empty"><span class="empty-icon">📊</span><p>Remplissez le formulaire et cliquez sur <strong>Calculer</strong> pour obtenir votre analyse complète avec score, feux tricolores et recommandations.</p></div>';
+  document.getElementById('s-traffic').style.display='none';
+  document.getElementById('s-reco').style.display='none';
+  document.getElementById('s-cats').style.display='none';
+  document.getElementById('s-detail').style.display='none';
+}
+
+function loadExample(){
+  // Apple (AAPL) données approximatives 2025
+  document.getElementById('ticker').value='Apple (AAPL)';
+  document.getElementById('sector').value='tech';
+  document.getElementById('country').value='us';
+  document.getElementById('mktcap').value='mega';
+  document.getElementById('horizon').value='lt';
+  // Valorisation
+  document.getElementById('per').value=29;
+  document.getElementById('peg').value=1.8;
+  document.getElementById('ev').value=23;
+  document.getElementById('pb').value=42;
+  document.getElementById('pfcf').value=28;
+  document.getElementById('ps').value=7.5;
+  document.getElementById('per_vs').value=0;
+  document.getElementById('val_hist').value=-1;
+  // Rentabilité
+  document.getElementById('roe').value=145;
+  document.getElementById('roic').value=55;
+  document.getElementById('roa').value=22;
+  document.getElementById('gm').value=46;
+  document.getElementById('ebitdam').value=33;
+  document.getElementById('om').value=31;
+  document.getElementById('nm').value=25;
+  document.getElementById('fcfm').value=27;
+  document.getElementById('margin_trend').value=1;
+  // Croissance
+  document.getElementById('rcg').value=8;
+  document.getElementById('epsg').value=12;
+  document.getElementById('fcfg').value=10;
+  document.getElementById('fwd_rev').value=7;
+  document.getElementById('fwd_eps').value=11;
+  document.getElementById('analysts').value=42;
+  document.getElementById('rev_consistency').value=2;
+  document.getElementById('recurring').value=2;
+  // Solidité
+  document.getElementById('de').value=-0.5;
+  document.getElementById('cr').value=1.07;
+  document.getElementById('qr').value=1.05;
+  document.getElementById('ic').value=28;
+  document.getElementById('fcfy').value=3.6;
+  document.getElementById('de_ratio').value=1.8;
+  document.getElementById('debt_trend').value=1;
+  document.getElementById('credit_rating').value=3;
+  // Dividendes
+  document.getElementById('dy').value=0.5;
+  document.getElementById('po').value=15;
+  document.getElementById('fcfpay').value=13;
+  document.getElementById('dg').value=5;
+  document.getElementById('divstreak').value=12;
+  document.getElementById('buyback').value=2;
+  // Qualitatif
+  document.getElementById('moat_type').value=4;
+  document.getElementById('moat_durability').value=1;
+  document.getElementById('mgmt').value=2;
+  document.getElementById('mgmt_ownership').value=0;
+  document.getElementById('capital_alloc').value=2;
+  document.getElementById('sect').value=3;
+  document.getElementById('mktshare').value=2;
+  document.getElementById('disruption').value=1;
+  document.getElementById('haram').value=0;
+  // Technique
+  document.getElementById('price').value=185;
+  document.getElementById('rsi').value=54;
+  document.getElementById('mm200').value=172;
+  document.getElementById('mm50').value=180;
+  document.getElementById('bb_high').value=195;
+  document.getElementById('bb_low').value=168;
+  document.getElementById('support').value=178;
+  document.getElementById('resist').value=195;
+  yn(document.querySelector('[onclick="yn(this,\'t_macd\',\'yes\')"]'),'t_macd','yes');
+  yn(document.querySelector('[onclick="yn(this,\'t_vol\',\'yes\')"]'),'t_vol','yes');
+  yn(document.querySelector('[onclick="yn(this,\'t_chart\',\'no\')"]'),'t_chart','no');
+  yn(document.querySelector('[onclick="yn(this,\'t_cons\',\'yes\')"]'),'t_cons','yes');
+  document.getElementById('t_riskreward').value=2;
+  document.getElementById('t_volatility').value=1;
+  // Macro
+  sc(document.querySelector('[onclick="sc(this,\'m_taux\',0)"]'),'m_taux',0);
+  sc(document.querySelector('[onclick="sc(this,\'m_reces\',1)"]'),'m_reces',1);
+  sc(document.querySelector('[onclick="sc(this,\'m_sent\',1)"]'),'m_sent',1);
+  yn(document.querySelector('[onclick="yn(this,\'m_dollar\',\'strong\')"]'),'m_dollar','strong');
+  sc(document.querySelector('[onclick="sc(this,\'m_geo\',0)"]'),'m_geo',0);
+  // Catalyseurs
+  yn(document.querySelector('[onclick="yn(this,\'c_earn\',\'no\')"]'),'c_earn','no');
+  yn(document.querySelector('[onclick="yn(this,\'c_cat\',\'yes\')"]'),'c_cat','yes');
+  yn(document.querySelector('[onclick="yn(this,\'c_risk\',\'no\')"]'),'c_risk','no');
+  yn(document.querySelector('[onclick="yn(this,\'c_insider\',\'yes\')"]'),'c_insider','yes');
+  document.getElementById('c_consensus').value=3;
+  sc(document.querySelector('[onclick="sc(this,\'c_risklvl\',1)"]'),'c_risklvl',1);
+  yn(document.querySelector('[onclick="yn(this,\'c_dilution\',\'no\')"]'),'c_dilution','no');
+  // ESG
+  document.getElementById('esg').value=65;
+  document.getElementById('esg_climate').value=2;
+  document.getElementById('esg_gov').value=2;
+  analyze();
+}
+</script>
+</body>
+</html>
