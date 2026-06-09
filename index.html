@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Analyseur d'Actions — Score d'Investissement</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy:#0D1B2A;--navy2:#15263A;--gold:#C9A84C;--teal:#1B6CA8;--teal-light:#E6F1FB;
+    --green:#0F6E56;--green-light:#E1F5EE;--amber:#854F0B;--amber-light:#FAEEDA;
+    --red:#A32D2D;--red-light:#FCEBEB;--bg:#F7F5F0;--surface:#FFFFFF;
+    --border:rgba(13,27,42,0.1);--text:#0D1B2A;--text2:#5A6A7A;--text3:#9AABB8;
+    --radius:12px;--radius-sm:8px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+  .app-header{background:var(--navy);padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:60px;position:sticky;top:0;z-index:100;border-bottom:2px solid var(--gold)}
+  .logo{display:flex;align-items:center;gap:10px;color:#fff;font-family:'DM Serif Display',serif;font-size:18px}
+  .logo-dot{width:8px;height:8px;border-radius:50%;background:var(--gold)}
+  .header-badge{font-size:11px;font-weight:500;color:var(--gold);border:1px solid var(--gold);padding:2px 10px;border-radius:20px;letter-spacing:.05em}
+
+  .app-body{max-width:1020px;margin:0 auto;padding:2rem 1.5rem 4rem;display:grid;grid-template-columns:1fr 330px;gap:1.5rem;align-items:start}
+
+  .panel{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);overflow:hidden;margin-bottom:1.25rem}
+  .panel:last-of-type{margin-bottom:0}
+  .panel-header{padding:.875rem 1.25rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text2)}
+  .panel-header-dot{width:6px;height:6px;border-radius:50%;background:var(--gold);flex-shrink:0}
+  .panel-header-pts{color:var(--text3);font-weight:400;margin-left:auto;font-size:11px}
+  .panel-body{padding:1.25rem}
+
+  .ticker-input{font-family:'DM Serif Display',serif;font-size:20px;width:100%;border:none;border-bottom:2px solid var(--border);padding:6px 0;background:transparent;color:var(--text);outline:none;transition:border-color .2s}
+  .ticker-input:focus{border-color:var(--gold)}
+  .ticker-input::placeholder{color:var(--text3);font-style:italic}
+
+  .section-label{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin-bottom:.875rem;padding-bottom:.5rem;border-bottom:1px solid var(--border)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:.875rem}
+  .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.875rem}
+
+  .field{display:flex;flex-direction:column;gap:4px}
+  .field label{font-size:11px;font-weight:500;color:var(--text2);letter-spacing:.03em}
+  .field input,.field select{font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;padding:7px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);background:#FAFAF8;color:var(--text);outline:none;transition:border-color .15s,background .15s}
+  .field input:focus,.field select:focus{border-color:var(--teal);background:#fff;box-shadow:0 0 0 3px rgba(27,108,168,.08)}
+  .field .hint{font-size:10px;color:var(--text3);line-height:1.3}
+
+  /* YESNO BUTTONS */
+  .yesno{display:flex;gap:6px}
+  .yn-btn{flex:1;padding:7px 4px;font-size:12px;font-weight:600;border:1px solid var(--border);border-radius:var(--radius-sm);background:#FAFAF8;color:var(--text2);cursor:pointer;transition:all .15s;text-align:center}
+  .yn-btn.yes.active{background:#E1F5EE;border-color:#1D9E75;color:#0F6E56}
+  .yn-btn.no.active{background:#FCEBEB;border-color:#E24B4A;color:#A32D2D}
+  .yn-btn:hover{background:#F0EDEA}
+
+  /* SCALE BUTTONS */
+  .scale-btns{display:flex;gap:4px}
+  .sc-btn{flex:1;padding:6px 2px;font-size:11px;font-weight:600;border:1px solid var(--border);border-radius:6px;background:#FAFAF8;color:var(--text2);cursor:pointer;transition:all .15s;text-align:center}
+  .sc-btn:hover{background:#F0EDEA}
+  .sc-btn.active-vn{background:#FCEBEB;border-color:#E24B4A;color:#A32D2D}
+  .sc-btn.active-n{background:#FAEEDA;border-color:#EF9F27;color:#854F0B}
+  .sc-btn.active-neu{background:#F1EFE8;border-color:#9AABB8;color:#5A6A7A}
+  .sc-btn.active-p{background:#E6F1FB;border-color:#3A9BD5;color:#185FA5}
+  .sc-btn.active-vp{background:#E1F5EE;border-color:#1D9E75;color:#0F6E56}
+
+  .halal-row{display:flex;align-items:center;gap:10px;padding:.75rem 1rem;background:#FFF9EC;border:1px solid #EFD98A;border-radius:var(--radius-sm);margin-bottom:1.25rem;cursor:pointer;user-select:none}
+  .halal-row span{font-size:12px;font-weight:500;color:#7A5C0A;flex:1}
+  .toggle{width:38px;height:22px;border-radius:11px;background:#D5C8A8;position:relative;transition:background .2s;flex-shrink:0}
+  .toggle.on{background:var(--gold)}
+  .toggle-knob{width:18px;height:18px;border-radius:50%;background:#fff;position:absolute;top:2px;left:2px;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+  .toggle.on .toggle-knob{left:18px}
+
+  .btn-main{width:100%;padding:13px;background:var(--navy);color:#fff;border:none;border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;letter-spacing:.03em;transition:background .15s,transform .1s;margin-bottom:.75rem}
+  .btn-main:hover{background:#1a2f45}
+  .btn-main:active{transform:scale(.99)}
+  .btn-secondary{width:100%;padding:10px;background:transparent;color:var(--text2);border:1px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;transition:background .15s}
+  .btn-secondary:hover{background:var(--bg)}
+
+  /* SCORE SIDEBAR */
+  .score-sticky{position:sticky;top:76px}
+  .score-card{background:var(--navy);border-radius:var(--radius);overflow:hidden;color:#fff}
+  .score-top{padding:1.5rem 1.5rem 1rem;position:relative}
+  .score-ticker{font-size:11px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);margin-bottom:.375rem}
+  .score-number{font-family:'DM Serif Display',serif;font-size:64px;line-height:1;color:#fff}
+  .score-slash{font-size:24px;color:rgba(255,255,255,.3);vertical-align:super}
+  .score-label{font-size:13px;color:rgba(255,255,255,.5);margin-top:4px}
+  .score-bar-wrap{height:5px;background:rgba(255,255,255,.1);margin:1rem 1.5rem 0}
+  .score-bar{height:100%;transition:width .6s cubic-bezier(.25,.46,.45,.94)}
+  .verdict-strip{padding:.875rem 1.5rem;font-size:13px;font-weight:600;border-top:1px solid rgba(255,255,255,.08);margin-top:1rem}
+  .verdict-advice{font-weight:400;font-size:12px;color:rgba(255,255,255,.6);margin-top:4px;line-height:1.5}
+
+  /* FEUX TRICOLORES */
+  .feux{display:flex;gap:8px;padding:1rem 1.5rem;border-top:1px solid rgba(255,255,255,.08)}
+  .feu{flex:1;text-align:center;padding:.625rem .5rem;border-radius:8px;background:rgba(255,255,255,.06)}
+  .feu-icon{font-size:18px;display:block;margin-bottom:3px}
+  .feu-label{font-size:10px;color:rgba(255,255,255,.5);line-height:1.3}
+  .feu-val{font-size:11px;font-weight:600;margin-top:2px}
+  .feu.green-light{background:rgba(29,158,117,.15)}
+  .feu.amber-light{background:rgba(239,159,39,.15)}
+  .feu.red-light{background:rgba(226,75,74,.15)}
+
+  .cats-section{padding:1rem 1.5rem;border-top:1px solid rgba(255,255,255,.08)}
+  .cat-row{display:flex;align-items:center;gap:10px;margin-bottom:.625rem}
+  .cat-row:last-child{margin-bottom:0}
+  .cat-row-name{font-size:11px;color:rgba(255,255,255,.55);flex:0 0 110px}
+  .cat-mini-track{flex:1;height:4px;background:rgba(255,255,255,.1);border-radius:2px;overflow:hidden}
+  .cat-mini-fill{height:100%;border-radius:2px;transition:width .5s ease}
+  .cat-row-pts{font-size:11px;font-weight:600;color:rgba(255,255,255,.7);flex:0 0 36px;text-align:right}
+
+  .detail-panel{margin-top:1.5rem}
+  .detail-section{margin-bottom:1rem}
+  .detail-section-title{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);margin-bottom:.5rem}
+  .detail-row{display:flex;align-items:center;padding:5px 0;border-bottom:1px solid var(--border);gap:8px}
+  .detail-row:last-child{border-bottom:none}
+  .detail-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+  .detail-name{font-size:12px;color:var(--text2);flex:1}
+  .detail-val{font-size:12px;font-weight:600;color:var(--text)}
+  .detail-pts-badge{font-size:10px;font-weight:600;padding:2px 7px;border-radius:10px}
+
+  .empty{text-align:center;padding:2.5rem 1.5rem;color:rgba(255,255,255,.3)}
+  .empty-icon{font-size:32px;margin-bottom:.75rem;display:block}
+  .empty p{font-size:12px;line-height:1.6}
+  .halal-badge{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:600;padding:3px 9px;border-radius:20px;background:#FFF3CD;color:#7A5C0A;border:1px solid #EFD98A;margin-left:.5rem}
+  .disclaimer{grid-column:1/-1;font-size:10px;color:var(--text3);text-align:center;padding-top:.5rem;line-height:1.6;border-top:1px solid var(--border)}
+
+  /* INFO TOOLTIP */
+  .info-tip{display:inline-block;width:14px;height:14px;border-radius:50%;background:var(--text3);color:#fff;font-size:9px;font-weight:700;text-align:center;line-height:14px;cursor:help;margin-left:4px;vertical-align:middle}
+
+  /* SECTION SEPARATOR */
+  .sep{height:1px;background:var(--border);margin:1.25rem 0}
+
+  @media(max-width:700px){
+    .app-body{grid-template-columns:1fr}
+    .score-sticky{position:static;order:-1}
+    .grid3{grid-template-columns:1fr 1fr}
+  }
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="logo"><div class="logo-dot"></div>Analyseur d'Actions</div>
+  <div class="header-badge">Score complet v2</div>
+</header>
+
+<div class="app-body">
+<div>
+
+  <!-- IDENTIFICATION -->
+  <div class="panel">
+    <div class="panel-header"><div class="panel-header-dot"></div>Identification de l'action</div>
+    <div class="panel-body">
+      <div class="field" style="margin-bottom:1rem">
+        <label>Nom / Ticker</label>
+        <input id="ticker" class="ticker-input" type="text" placeholder="ex : Apple (AAPL), TotalEnergies (TTE)…">
+      </div>
+      <div class="halal-row" onclick="toggleHalal()" id="halal-row">
+        <span>☪ Filtre halal — pénalise banques, assurances, alcool, armement</span>
+        <div class="toggle" id="htoggle"><div class="toggle-knob"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VALORISATION -->
+  <div class="panel">
+    <div class="panel-header"><div class="panel-header-dot"></div>① Valorisation<span class="panel-header-pts">20 pts max</span></div>
+    <div class="panel-body">
+      <div class="grid3">
+        <div class="field"><label>PER</label><input id="per" type="number" step="0.1" placeholder="ex : 22"><span class="hint">Idéal : 10–25</span></div>
+        <div class="field"><label>PEG Ratio</label><input id="peg" type="number" step="0.01" placeholder="ex : 1.2"><span class="hint">Idéal : &lt; 1</span></div>
+        <div class="field"><label>EV / EBITDA</label><input id="ev" type="number" step="0.1" placeholder="ex : 12"><span class="hint">Idéal : &lt; 15</span></div>
+        <div class="field"><label>Price / Book</label><input id="pb" type="number" step="0.1" placeholder="ex : 2.5"><span class="hint">Idéal : &lt; 3</span></div>
+        <div class="field"><label>Price / FCF</label><input id="pfcf" type="number" step="0.1" placeholder="ex : 20"><span class="hint">Idéal : &lt; 25</span></div>
+        <div class="field"><label>Price / Sales</label><input id="ps" type="number" step="0.1" placeholder="ex : 3"><span class="hint">Idéal : &lt; 5</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RENTABILITE -->
+  <div class="panel">
+    <div class="panel-header"><div class="panel-header-dot"></div>② Rentabilité<span class="panel-header-pts">20 pts max</span></div>
+    <div class="panel-body">
+      <div class="grid3">
+        <div class="field"><label>ROE (%)</label><input id="roe" type="number" step="0.1" placeholder="ex : 18"><span class="hint">Idéal : &gt; 15 %</span></div>
+        <div class="field"><label>ROIC (%)</label><input id="roic" type="number" step="0.1" placeholder="ex : 12"><span class="hint">Idéal : &gt; 10 %</span></div>
+        <div class="field"><label>Marge nette (%)</label><input id="nm" type="number" step="0.1" placeholder="ex : 15"><span class="hint">Idéal : &gt; 10 %</span></div>
+        <div class="field"><label>Marge brute (%)</label><input id="gm" type="number" step="0.1" placeholder="ex : 45"><span class="hint">Idéal : &gt; 30 %</span></div>
+        <div class="field"><label>Marge opérationnelle (%)</label><input id="om" type="number" step="0.1" placeholder="ex : 20"><span class="hint">Idéal : &gt; 15 %</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CROISSANCE -->
+  <div class="panel">
+    <div class="panel-header"><div class="panel-header-dot"></div>③ Croissance <small style="font-size:10px;font-weight:400;color:var(--text3)">(sur 5 ans)</small><span class="panel-header-pts">20 pts max</span></div>
+    <div class="panel-body">
+      <div class="grid3">
+        <div class="field"><label>Croissance CA (%/an)</label><input id="rcg" type="number" step="0.1" placeholder="ex : 12"><span class="hint">Idéal : &gt; 10 %</span></div>
+        <div class="field"><label>Croissance BPA (%/an)</label><input id="epsg" type="number" step="0.1" placeholder="ex : 15"><span class="hint">Idéal : &gt; 10 %</span></div>
+        <div class="field"><label>Croissance FCF (%/an)</label><input id="fcfg" type="number" step="0.1" placeholder="ex : 10"><span class="hint">Idéal : &gt; 8 %</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SOLIDITE -->
+  <div class="panel">
+    <div class="panel-header"><div class="panel-header-dot"></div>④ Solidité financière<span class="panel-header-pts">20 pts max</span></div>
+    <div class="panel-body">
+      <div class="grid3">
+        <div class="field"><label>Dette nette / EBITDA</label><input id="de" type="number" step="0.1" placeholder="ex : 1.5"><span class="hint">Idéal : &lt; 2×</span></div>
+        <div class="field"><label>Ratio de liquidité</label><input id="cr" type="number" step="0.01" placeholder="ex : 2.1"><span class="hint">Idéal : &gt; 1.5</span></div>
+        <div class="field"><label>Couverture intérêts</label><input id="ic" type="number" step="0.1" placeholder="ex : 8"><span class="hint">Idéal : &gt; 3×</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DIVIDENDES -->
+  <div class="panel">
+    <div class="panel-header"><div class="panel-header-dot"></div>⑤ Dividendes <small style="font-size:10px;font-weight:400;color:var(--text3)">(facultatif)</small><span class="panel-header-pts">10 pts max</span></div>
+    <div class="panel-body">
+      <div class="grid3">
+        <div class="field"><label>Rendement (%)</label><input id="dy" type="number" step="0.1" placeholder="ex : 2.5"><span class="hint">Idéal : 1–5 %</span></div>
+        <div class="field"><label>Taux distribution (%)</label><input id="po" type="number" step="0.1" placeholder="ex : 40"><span class="hint">Idéal : &lt; 60 %</span></div>
+        <div class="field"><label>Croissance div. (%/an)</label><input id="dg" type="number" step="0.1" placeholder="ex : 5"><span class="hint">Idéal : &gt; 5 %</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- QUALITATIF -->
+  <div class="panel">
+    <div class="panel-header"><div class="panel-header-dot"></div>⑥ Qualitatif<span class="panel-header-pts">10 pts max</span></div>
+    <div class="panel-body">
+      <div class="grid2">
+        <div class="field"><label>Force du moat</label>
+          <select id="moat"><option value="">-- Sélectionner --</option><option value="4">Fort (marque, réseau, brevets)</option><option value="2">Moyen (quelques avantages)</option><option value="0">Faible (très concurrentiel)</option></select>
+        </div>
+        <div class="field"><label>Qualité du management</label>
+          <select id="mgmt"><option value="">-- Sélectionner --</option><option value="3">Excellent (actionnaire, vision claire)</option><option value="1.5">Correct (pas de signal négatif)</option><option value="0">Médiocre (dilution, opacité)</option></select>
+        </div>
+        <div class="field"><label>Tendance du secteur</label>
+          <select id="sect"><option value="">-- Sélectionner --</option><option value="3">En forte croissance (IA, santé…)</option><option value="1.5">Stable (défensif)</option><option value="0">En déclin / très cyclique</option></select>
+        </div>
+        <div class="field"><label>Secteur problématique (halal)</label>
+          <select id="haram"><option value="0">Non — activité neutre</option><option value="1">Banque / Assurance / Finance</option><option value="2">Alcool / Tabac / Jeux / Armement</option></select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ANALYSE TECHNIQUE -->
+  <div class="panel">
+    <div class="panel-header"><div class="panel-header-dot"></div>⑦ Analyse Technique <small style="font-size:10px;font-weight:400;color:var(--text3)">(TradingView)</small><span class="panel-header-pts">15 pts max</span></div>
+    <div class="panel-body">
+
+      <div class="section-label">Valeurs numériques</div>
+      <div class="grid3" style="margin-bottom:1.25rem">
+        <div class="field">
+          <label>RSI (14 périodes)</label>
+          <input id="rsi" type="number" step="0.1" placeholder="ex : 48">
+          <span class="hint">Idéal : 35–65 (ni suracheté ni survendu)</span>
+        </div>
+        <div class="field">
+          <label>Cours actuel (€/$)</label>
+          <input id="price" type="number" step="0.01" placeholder="ex : 185.50">
+          <span class="hint">Prix du marché aujourd'hui</span>
+        </div>
+        <div class="field">
+          <label>MM200 (Moyenne Mobile 200j)</label>
+          <input id="mm200" type="number" step="0.01" placeholder="ex : 172.00">
+          <span class="hint">Cours &gt; MM200 = tendance haussière</span>
+        </div>
+        <div class="field">
+          <label>MM50 (Moyenne Mobile 50j)</label>
+          <input id="mm50" type="number" step="0.01" placeholder="ex : 180.00">
+          <span class="hint">Cours &gt; MM50 = momentum positif</span>
+        </div>
+      </div>
+
+      <div class="section-label">Questions clés (Oui / Non)</div>
+      <div style="display:flex;flex-direction:column;gap:.875rem">
+        <div class="field">
+          <label>Le cours est-il au-dessus du support clé le plus proche ?</label>
+          <div class="yesno"><button class="yn-btn yes" onclick="yn(this,'t_support','yes')">✓ Oui</button><button class="yn-btn no" onclick="yn(this,'t_support','no')">✗ Non</button></div>
+          <input type="hidden" id="t_support" value="">
+          <span class="hint">Support = niveau de prix où le cours a rebondi plusieurs fois</span>
+        </div>
+        <div class="field">
+          <label>Le MACD est-il en territoire positif (ou vient-il de croiser à la hausse) ?</label>
+          <div class="yesno"><button class="yn-btn yes" onclick="yn(this,'t_macd','yes')">✓ Oui</button><button class="yn-btn no" onclick="yn(this,'t_macd','no')">✗ Non</button></div>
+          <input type="hidden" id="t_macd" value="">
+          <span class="hint">Signal haussier = ligne MACD croise ligne signal vers le haut</span>
+        </div>
+        <div class="field">
+          <label>Le volume est-il en hausse sur les séances récentes ?</label>
+          <div class="yesno"><button class="yn-btn yes" onclick="yn(this,'t_vol','yes')">✓ Oui</button><button class="yn-btn no" onclick="yn(this,'t_vol','no')">✗ Non</button></div>
+          <input type="hidden" id="t_vol" value="">
+          <span class="hint">Hausse des volumes confirme la validité du mouvement de cours</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTEXTE MACRO -->
+  <div class="panel">
+    <div class="panel-header"><div class="panel-header-dot"></div>⑧ Contexte Macro-économique<span class="panel-header-pts">10 pts max</span></div>
+    <div class="panel-body">
+      <div style="display:flex;flex-direction:column;gap:1rem">
+
+        <div class="field">
+          <label>Environnement des taux d'intérêt</label>
+          <div class="scale-btns">
+            <button class="sc-btn" onclick="sc(this,'m_taux',-2)" data-val="-2">📈 Très haut</button>
+            <button class="sc-btn" onclick="sc(this,'m_taux',-1)" data-val="-1">⬆ En hausse</button>
+            <button class="sc-btn" onclick="sc(this,'m_taux',0)" data-val="0">➡ Stable</button>
+            <button class="sc-btn" onclick="sc(this,'m_taux',1)" data-val="1">⬇ En baisse</button>
+            <button class="sc-btn" onclick="sc(this,'m_taux',2)" data-val="2">📉 Très bas</button>
+          </div>
+          <input type="hidden" id="m_taux" value="">
+          <span class="hint">Taux bas = favorable aux actions. Taux hauts = pression sur les valeurs de croissance</span>
+        </div>
+
+        <div class="field">
+          <label>Risque de récession à 12 mois</label>
+          <div class="scale-btns">
+            <button class="sc-btn" onclick="sc(this,'m_reces',-2)" data-val="-2">🔴 Très élevé</button>
+            <button class="sc-btn" onclick="sc(this,'m_reces',-1)" data-val="-1">🟠 Élevé</button>
+            <button class="sc-btn" onclick="sc(this,'m_reces',0)" data-val="0">🟡 Modéré</button>
+            <button class="sc-btn" onclick="sc(this,'m_reces',1)" data-val="1">🟢 Faible</button>
+            <button class="sc-btn" onclick="sc(this,'m_reces',2)" data-val="2">✅ Très faible</button>
+          </div>
+          <input type="hidden" id="m_reces" value="">
+          <span class="hint">En cas de récession, favoriser les valeurs défensives (santé, utilities, alimentaire)</span>
+        </div>
+
+        <div class="field">
+          <label>Sentiment général du marché</label>
+          <div class="scale-btns">
+            <button class="sc-btn" onclick="sc(this,'m_sent',-2)" data-val="-2">😱 Panique</button>
+            <button class="sc-btn" onclick="sc(this,'m_sent',-1)" data-val="-1">😟 Négatif</button>
+            <button class="sc-btn" onclick="sc(this,'m_sent',0)" data-val="0">😐 Neutre</button>
+            <button class="sc-btn" onclick="sc(this,'m_sent',1)" data-val="1">😊 Positif</button>
+            <button class="sc-btn" onclick="sc(this,'m_sent',2)" data-val="2">🤩 Euphorie</button>
+          </div>
+          <input type="hidden" id="m_sent" value="">
+          <span class="hint">Acheter dans la peur, vendre dans l'euphorie (Buffett). L'euphorie = signal de prudence</span>
+        </div>
+
+        <div class="field">
+          <label>Le dollar USD est-il fort par rapport aux devises locales ?</label>
+          <div class="yesno"><button class="yn-btn yes" onclick="yn(this,'m_dollar','yes')">✓ Dollar fort</button><button class="yn-btn no" onclick="yn(this,'m_dollar','no')">✗ Dollar faible</button></div>
+          <input type="hidden" id="m_dollar" value="">
+          <span class="hint">Dollar fort = pression sur les multinationales US exportatrices</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CATALYSEURS -->
+  <div class="panel">
+    <div class="panel-header"><div class="panel-header-dot"></div>⑨ Catalyseurs & Risques<span class="panel-header-pts">15 pts max</span></div>
+    <div class="panel-body">
+      <div style="display:flex;flex-direction:column;gap:1rem">
+
+        <div class="field">
+          <label>Des résultats trimestriels sont-ils attendus dans moins de 30 jours ?</label>
+          <div class="yesno"><button class="yn-btn yes" onclick="yn(this,'c_earn','yes')">✓ Oui (attendre)</button><button class="yn-btn no" onclick="yn(this,'c_earn','no')">✗ Non (sécurisant)</button></div>
+          <input type="hidden" id="c_earn" value="">
+          <span class="hint">Acheter avant des résultats = risque de gap baissier si déception</span>
+        </div>
+
+        <div class="field">
+          <label>Y a-t-il un catalyseur positif identifié (nouveau produit, contrat, rachat) ?</label>
+          <div class="yesno"><button class="yn-btn yes" onclick="yn(this,'c_cat','yes')">✓ Oui</button><button class="yn-btn no" onclick="yn(this,'c_cat','no')">✗ Non</button></div>
+          <input type="hidden" id="c_cat" value="">
+          <span class="hint">Un catalyseur proche peut accélérer la revalorisation du titre</span>
+        </div>
+
+        <div class="field">
+          <label>Y a-t-il des risques juridiques, réglementaires ou géopolitiques identifiés ?</label>
+          <div class="yesno"><button class="yn-btn yes" onclick="yn(this,'c_risk','yes')">✓ Oui (risque)</button><button class="yn-btn no" onclick="yn(this,'c_risk','no')">✗ Non</button></div>
+          <input type="hidden" id="c_risk" value="">
+          <span class="hint">Litige, enquête, changement de régulation = pression sur le cours</span>
+        </div>
+
+        <div class="field">
+          <label>Le management a-t-il acheté des actions récemment (insider buying) ?</label>
+          <div class="yesno"><button class="yn-btn yes" onclick="yn(this,'c_insider','yes')">✓ Oui (positif)</button><button class="yn-btn no" onclick="yn(this,'c_insider','no')">✗ Non / Vendent</button></div>
+          <input type="hidden" id="c_insider" value="">
+          <span class="hint">Les insiders qui achètent = confiance dans les perspectives de l'entreprise</span>
+        </div>
+
+        <div class="field">
+          <label>Niveau global des risques sur ce titre</label>
+          <div class="scale-btns">
+            <button class="sc-btn" onclick="sc(this,'c_risklvl',-2)" data-val="-2">🔴 Très élevé</button>
+            <button class="sc-btn" onclick="sc(this,'c_risklvl',-1)" data-val="-1">🟠 Élevé</button>
+            <button class="sc-btn" onclick="sc(this,'c_risklvl',0)" data-val="0">🟡 Modéré</button>
+            <button class="sc-btn" onclick="sc(this,'c_risklvl',1)" data-val="1">🟢 Faible</button>
+            <button class="sc-btn" onclick="sc(this,'c_risklvl',2)" data-val="2">✅ Très faible</button>
+          </div>
+          <input type="hidden" id="c_risklvl" value="">
+          <span class="hint">Évaluation globale : taille de la société, volatilité historique, secteur</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <button class="btn-main" onclick="analyze()">Calculer le score complet →</button>
+  <button class="btn-secondary" onclick="resetAll()">Réinitialiser</button>
+</div>
+
+<!-- SCORE SIDEBAR -->
+<div class="score-sticky">
+  <div class="score-card" id="score-card">
+    <div class="score-top">
+      <div class="score-ticker" id="s-ticker">EN ATTENTE</div>
+      <div><span class="score-number" id="s-number">—</span><span class="score-slash"> /100</span></div>
+      <div class="score-label" id="s-label">Renseignez les données</div>
+    </div>
+    <div class="score-bar-wrap"><div class="score-bar" id="s-bar" style="width:0;background:var(--gold)"></div></div>
+
+    <div class="verdict-strip" id="s-verdict">
+      <div class="empty">
+        <span class="empty-icon">📊</span>
+        <p>Remplissez le formulaire et cliquez sur <strong>Calculer</strong> pour voir votre analyse complète.</p>
+      </div>
+    </div>
+
+    <div class="feux" id="s-feux" style="display:none">
+      <div class="feu" id="feu-fond"><span class="feu-icon">🏛</span><div class="feu-label">Fondamentaux</div><div class="feu-val" id="feu-fond-v">–</div></div>
+      <div class="feu" id="feu-tech"><span class="feu-icon">📈</span><div class="feu-label">Technique</div><div class="feu-val" id="feu-tech-v">–</div></div>
+      <div class="feu" id="feu-macro"><span class="feu-icon">🌍</span><div class="feu-label">Macro</div><div class="feu-val" id="feu-macro-v">–</div></div>
+    </div>
+
+    <div class="cats-section" id="s-cats" style="display:none"></div>
+  </div>
+
+  <div class="detail-panel" id="s-detail" style="display:none"></div>
+</div>
+
+<div class="disclaimer">⚠ Document informatif uniquement — Ne constitue pas un conseil en investissement. Tout investissement comporte un risque de perte en capital.</div>
+</div>
+
+<script>
+let halalOn = false;
+
+function toggleHalal(){
+  halalOn = !halalOn;
+  document.getElementById('htoggle').classList.toggle('on', halalOn);
+}
+
+function yn(btn, id, val){
+  const wrap = btn.parentElement;
+  wrap.querySelectorAll('.yn-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById(id).value = val;
+}
+
+function sc(btn, id, val){
+  const wrap = btn.parentElement;
+  wrap.querySelectorAll('.sc-btn').forEach(b => {
+    b.classList.remove('active-vn','active-n','active-neu','active-p','active-vp');
+  });
+  const cls = val===-2?'active-vn':val===-1?'active-n':val===0?'active-neu':val===1?'active-p':'active-vp';
+  btn.classList.add(cls);
+  document.getElementById(id).value = val;
+}
+
+function v(id){ const val=parseFloat(document.getElementById(id).value); return isNaN(val)?null:val; }
+function vstr(id){ return document.getElementById(id).value; }
+
+function scoreColor(s){
+  if(s>=75) return {bar:'#1D9E75',text:'#5EDFB8'};
+  if(s>=55) return {bar:'#3A9BD5',text:'#7EC6F0'};
+  if(s>=40) return {bar:'#EF9F27',text:'#F8CE7A'};
+  return {bar:'#E24B4A',text:'#F08080'};
+}
+function dotColor(sig){ return sig==='pos'?'#1D9E75':sig==='warn'?'#EF9F27':sig==='neg'?'#E24B4A':'#9AABB8'; }
+function badgeStyle(sig){
+  if(sig==='pos') return 'background:#E1F5EE;color:#0F6E56';
+  if(sig==='warn') return 'background:#FAEEDA;color:#854F0B';
+  if(sig==='neg') return 'background:#FCEBEB;color:#A32D2D';
+  return 'background:#F1EFE8;color:#5F5E5A';
+}
+
+function analyze(){
+  const ticker = document.getElementById('ticker').value.trim() || 'Action';
+  let cats = {};
+
+  // ── VALORISATION ──
+  let vpts=0, vdet=[];
+  const per=v('per'); if(per!==null){let p=per<15?4:per<25?3:per<35?2:per<50?1:0,s=per<25?'pos':per<50?'warn':'neg';vpts+=p;vdet.push({n:'PER',v:per.toFixed(1),p,max:4,s});}
+  const peg=v('peg'); if(peg!==null){let p=peg<1?4:peg<1.5?3:peg<2?2:peg<3?1:0,s=peg<1.5?'pos':peg<2.5?'warn':'neg';vpts+=p;vdet.push({n:'PEG',v:peg.toFixed(2),p,max:4,s});}
+  const ev=v('ev');   if(ev!==null){let p=ev<10?4:ev<15?3:ev<20?2:ev<30?1:0,s=ev<15?'pos':ev<25?'warn':'neg';vpts+=p;vdet.push({n:'EV/EBITDA',v:ev.toFixed(1)+'×',p,max:4,s});}
+  const pb=v('pb');   if(pb!==null){let p=pb<2?2:pb<4?1.5:pb<7?1:0,s=pb<4?'pos':pb<7?'warn':'neg';vpts+=p;vdet.push({n:'P/Book',v:pb.toFixed(1),p,max:2,s});}
+  const pfcf=v('pfcf');if(pfcf!==null){let p=pfcf<15?3:pfcf<25?2:pfcf<35?1:0,s=pfcf<25?'pos':pfcf<35?'warn':'neg';vpts+=p;vdet.push({n:'P/FCF',v:pfcf.toFixed(1),p,max:3,s});}
+  const ps=v('ps');   if(ps!==null){let p=ps<2?3:ps<5?2:ps<10?1:0,s=ps<5?'pos':ps<10?'warn':'neg';vpts+=p;vdet.push({n:'P/Sales',v:ps.toFixed(1),p,max:3,s});}
+  cats['Valorisation']={pts:vpts,max:20,det:vdet};
+
+  // ── RENTABILITE ──
+  let rpts=0,rdet=[];
+  const roe=v('roe');if(roe!==null){let p=roe>25?5:roe>15?4:roe>10?2:roe>5?1:0,s=roe>15?'pos':roe>5?'warn':'neg';rpts+=p;rdet.push({n:'ROE',v:roe.toFixed(1)+'%',p,max:5,s});}
+  const roic=v('roic');if(roic!==null){let p=roic>15?5:roic>10?3:roic>5?1.5:0,s=roic>10?'pos':roic>5?'warn':'neg';rpts+=p;rdet.push({n:'ROIC',v:roic.toFixed(1)+'%',p,max:5,s});}
+  const nm=v('nm');if(nm!==null){let p=nm>20?4:nm>10?3:nm>5?2:nm>0?1:0,s=nm>10?'pos':nm>5?'warn':'neg';rpts+=p;rdet.push({n:'Marge nette',v:nm.toFixed(1)+'%',p,max:4,s});}
+  const gm=v('gm');if(gm!==null){let p=gm>50?3:gm>30?2:gm>15?1:0,s=gm>30?'pos':gm>15?'warn':'neg';rpts+=p;rdet.push({n:'Marge brute',v:gm.toFixed(1)+'%',p,max:3,s});}
+  const om=v('om');if(om!==null){let p=om>20?3:om>15?2:om>8?1:0,s=om>15?'pos':om>8?'warn':'neg';rpts+=p;rdet.push({n:'Marge opérat.',v:om.toFixed(1)+'%',p,max:3,s});}
+  cats['Rentabilité']={pts:rpts,max:20,det:rdet};
+
+  // ── CROISSANCE ──
+  let cpts=0,cdet=[];
+  const rcg=v('rcg');if(rcg!==null){let p=rcg>20?7:rcg>10?5:rcg>5?3:rcg>0?1:0,s=rcg>10?'pos':rcg>0?'warn':'neg';cpts+=p;cdet.push({n:'Croissance CA',v:rcg.toFixed(1)+'%/an',p,max:7,s});}
+  const epsg=v('epsg');if(epsg!==null){let p=epsg>20?7:epsg>10?5:epsg>5?3:epsg>0?1:0,s=epsg>10?'pos':epsg>0?'warn':'neg';cpts+=p;cdet.push({n:'Croissance BPA',v:epsg.toFixed(1)+'%/an',p,max:7,s});}
+  const fcfg=v('fcfg');if(fcfg!==null){let p=fcfg>15?6:fcfg>8?4:fcfg>3?2:fcfg>0?1:0,s=fcfg>8?'pos':fcfg>0?'warn':'neg';cpts+=p;cdet.push({n:'Croissance FCF',v:fcfg.toFixed(1)+'%/an',p,max:6,s});}
+  cats['Croissance']={pts:cpts,max:20,det:cdet};
+
+  // ── SOLIDITE ──
+  let spts=0,sdet=[];
+  const de=v('de');if(de!==null){let p=de<0?8:de<1?8:de<2?6:de<3?4:de<4?2:0,s=de<2?'pos':de<4?'warn':'neg';spts+=p;sdet.push({n:'Dette/EBITDA',v:de.toFixed(1)+'×',p,max:8,s});}
+  const cr=v('cr');if(cr!==null){let p=cr>2?6:cr>1.5?4:cr>1?2:0,s=cr>1.5?'pos':cr>1?'warn':'neg';spts+=p;sdet.push({n:'Ratio liquidité',v:cr.toFixed(2),p,max:6,s});}
+  const ic=v('ic');if(ic!==null){let p=ic>8?6:ic>5?4:ic>3?2:ic>1?1:0,s=ic>5?'pos':ic>3?'warn':'neg';spts+=p;sdet.push({n:'Couv. intérêts',v:ic.toFixed(1)+'×',p,max:6,s});}
+  cats['Solidité financière']={pts:spts,max:20,det:sdet};
+
+  // ── DIVIDENDES ──
+  let dpts=0,ddet=[];
+  const dy=v('dy');if(dy!==null){let p=(dy>=1&&dy<=4)?3:(dy>4&&dy<=6)?2:dy>6?0:1,s=(dy>=1&&dy<=4)?'pos':dy>6?'neg':'warn';dpts+=p;ddet.push({n:'Rendement',v:dy.toFixed(1)+'%',p,max:3,s});}
+  const po=v('po');if(po!==null){let p=(po>0&&po<50)?3:po<70?2:po<85?1:0,s=po<60?'pos':po<80?'warn':'neg';dpts+=p;ddet.push({n:'Taux distribution',v:po.toFixed(0)+'%',p,max:3,s});}
+  const dg=v('dg');if(dg!==null){let p=dg>8?4:dg>5?3:dg>2?2:dg>=0?1:0,s=dg>5?'pos':dg>=0?'warn':'neg';dpts+=p;ddet.push({n:'Croissance div.',v:dg.toFixed(1)+'%/an',p,max:4,s});}
+  cats['Dividendes']={pts:dpts,max:10,det:ddet};
+
+  // ── QUALITATIF ──
+  let qpts=0,qdet=[];
+  const moatV=parseFloat(document.getElementById('moat').value);
+  if(!isNaN(moatV)&&document.getElementById('moat').value!==''){const s=moatV===4?'pos':moatV===2?'warn':'neg';qpts+=moatV;qdet.push({n:'Moat',v:moatV===4?'Fort':moatV===2?'Moyen':'Faible',p:moatV,max:4,s});}
+  const mgmtV=parseFloat(document.getElementById('mgmt').value);
+  if(!isNaN(mgmtV)&&document.getElementById('mgmt').value!==''){const s=mgmtV===3?'pos':mgmtV===1.5?'warn':'neg';qpts+=mgmtV;qdet.push({n:'Management',v:mgmtV===3?'Excellent':mgmtV===1.5?'Correct':'Médiocre',p:mgmtV,max:3,s});}
+  const sectV=parseFloat(document.getElementById('sect').value);
+  if(!isNaN(sectV)&&document.getElementById('sect').value!==''){const s=sectV===3?'pos':sectV===1.5?'warn':'neg';qpts+=sectV;qdet.push({n:'Secteur',v:sectV===3?'En croissance':sectV===1.5?'Stable':'En déclin',p:sectV,max:3,s});}
+  cats['Qualitatif']={pts:qpts,max:10,det:qdet};
+
+  // ── ANALYSE TECHNIQUE ──
+  let tpts=0,tdet=[];
+  const rsi=v('rsi'),price=v('price'),mm200=v('mm200'),mm50=v('mm50');
+  if(rsi!==null){let p=rsi>=35&&rsi<=65?4:rsi>=25&&rsi<35||rsi>65&&rsi<=75?2:0,s=rsi>=35&&rsi<=65?'pos':rsi>=25&&rsi<=75?'warn':'neg';tpts+=p;tdet.push({n:'RSI',v:rsi.toFixed(1),p,max:4,s});}
+  if(price!==null&&mm200!==null){let above=price>mm200,p=above?3:0,s=above?'pos':'neg';tpts+=p;tdet.push({n:'Cours vs MM200',v:above?'Au-dessus ✓':'En-dessous ✗',p,max:3,s});}
+  if(price!==null&&mm50!==null){let above=price>mm50,p=above?2:0,s=above?'pos':'neg';tpts+=p;tdet.push({n:'Cours vs MM50',v:above?'Au-dessus ✓':'En-dessous ✗',p,max:2,s});}
+  if(mm50!==null&&mm200!==null){let gc=mm50>mm200,p=gc?2:0,s=gc?'pos':'warn';tpts+=p;tdet.push({n:'Golden Cross',v:gc?'MM50 > MM200 ✓':'MM50 < MM200',p,max:2,s});}
+  const tsup=vstr('t_support');if(tsup){let p=tsup==='yes'?2:0,s=tsup==='yes'?'pos':'neg';tpts+=p;tdet.push({n:'Au-dessus support',v:tsup==='yes'?'Oui ✓':'Non ✗',p,max:2,s});}
+  const tmacd=vstr('t_macd');if(tmacd){let p=tmacd==='yes'?1:0,s=tmacd==='yes'?'pos':'warn';tpts+=p;tdet.push({n:'MACD haussier',v:tmacd==='yes'?'Oui ✓':'Non',p,max:1,s});}
+  const tvol=vstr('t_vol');if(tvol){let p=tvol==='yes'?1:0,s=tvol==='yes'?'pos':'warn';tpts+=p;tdet.push({n:'Volume en hausse',v:tvol==='yes'?'Oui ✓':'Non',p,max:1,s});}
+  cats['Technique']={pts:tpts,max:15,det:tdet};
+
+  // ── MACRO ──
+  let mpts=0,mdet=[];
+  const mtaux=vstr('m_taux');if(mtaux!==''){let val=parseInt(mtaux),p=val===2?3:val===1?2:val===0?1:val===-1?0:0,s=val>=1?'pos':val===0?'warn':'neg';mpts+=Math.max(0,p);mdet.push({n:'Env. des taux',v:val===2?'Très bas ✓':val===1?'En baisse':val===0?'Stable':val===-1?'En hausse':'Très haut ✗',p:Math.max(0,p),max:3,s});}
+  const mreces=vstr('m_reces');if(mreces!==''){let val=parseInt(mreces),p=val===2?3:val===1?2:val===0?1:0,s=val>=1?'pos':val===0?'warn':'neg';mpts+=p;mdet.push({n:'Risque récession',v:val===2?'Très faible ✓':val===1?'Faible':val===0?'Modéré':val===-1?'Élevé':'Très élevé ✗',p,max:3,s});}
+  const msent=vstr('m_sent');if(msent!==''){let val=parseInt(msent),p=val===0?2:val===1?2:val===2?0:val===-1?1:0,s=val===0||val===1?'pos':val===2?'neg':'warn';mpts+=p;mdet.push({n:'Sentiment marché',v:val===2?'Euphorie ⚠':val===1?'Positif':val===0?'Neutre ✓':val===-1?'Négatif':'Panique',p,max:2,s});}
+  const mdollar=vstr('m_dollar');if(mdollar!==''){let p=mdollar==='no'?2:0,s=mdollar==='no'?'pos':'warn';mpts+=p;mdet.push({n:'Dollar',v:mdollar==='no'?'Faible (favorable)':'Fort (pression)',p,max:2,s});}
+  cats['Macro']={pts:mpts,max:10,det:mdet};
+
+  // ── CATALYSEURS ──
+  let kpts=0,kdet=[];
+  const cearn=vstr('c_earn');if(cearn!==''){let p=cearn==='no'?3:0,s=cearn==='no'?'pos':'warn';kpts+=p;kdet.push({n:'Résultats imminents',v:cearn==='yes'?'Oui ⚠ (attendre)':'Non ✓',p,max:3,s});}
+  const ccat=vstr('c_cat');if(ccat!==''){let p=ccat==='yes'?4:0,s=ccat==='yes'?'pos':'neutral';kpts+=p;kdet.push({n:'Catalyseur positif',v:ccat==='yes'?'Identifié ✓':'Aucun',p,max:4,s});}
+  const crisk=vstr('c_risk');if(crisk!==''){let p=crisk==='no'?3:0,s=crisk==='no'?'pos':'neg';kpts+=p;kdet.push({n:'Risques juridiques',v:crisk==='yes'?'Oui ✗':'Non ✓',p,max:3,s});}
+  const cins=vstr('c_insider');if(cins!==''){let p=cins==='yes'?2:0,s=cins==='yes'?'pos':'warn';kpts+=p;kdet.push({n:'Insider buying',v:cins==='yes'?'Oui ✓':'Non',p,max:2,s});}
+  const criskl=vstr('c_risklvl');if(criskl!==''){let val=parseInt(criskl),p=val===2?3:val===1?2:val===0?1:0,s=val>=1?'pos':val===0?'warn':'neg';kpts+=p;kdet.push({n:'Niveau de risque',v:val===2?'Très faible ✓':val===1?'Faible':val===0?'Modéré':val===-1?'Élevé':'Très élevé ✗',p,max:3,s});}
+  cats['Catalyseurs']={pts:kpts,max:15,det:kdet};
+
+  // ── SCORE FINAL ──
+  let tot=0,maxTot=0;
+  for(const c of Object.values(cats)){tot+=c.pts;maxTot+=c.max;}
+  let penalty=0;
+  if(halalOn){const hs=parseInt(document.getElementById('haram').value)||0;if(hs===1)penalty=15;if(hs===2)penalty=40;}
+  const raw=Math.round((tot/maxTot)*100-penalty);
+  const score=Math.max(0,Math.min(100,raw));
+  const col=scoreColor(score);
+
+  let verdict,advice;
+  if(score>=80){verdict='● Opportunité forte';advice='Fondamentaux, technique et macro alignés. Définissez votre taille de position et entrez progressivement.';}
+  else if(score>=65){verdict='● Intéressant';advice='Profil solide. Vérifiez le point d\'entrée technique avant d\'acheter.';}
+  else if(score>=50){verdict='● Neutre — à surveiller';advice='Des atouts existent mais des faiblesses persistent. Mettez en watchlist.';}
+  else if(score>=35){verdict='● Médiocre';advice='Trop de signaux négatifs. Ne pas se positionner sans catalyseur fort.';}
+  else{verdict='● À éviter';advice='Risque de perte en capital significatif. Cherchez mieux.';}
+  if(halalOn&&penalty>0)advice+=` (Pénalité halal : -${penalty} pts)`;
+
+  // FEUX TRICOLORES
+  const fondScore=Math.round(((cats['Valorisation'].pts+cats['Rentabilité'].pts+cats['Croissance'].pts+cats['Solidité financière'].pts+cats['Dividendes'].pts+cats['Qualitatif'].pts)/100)*100);
+  const techScore=cats['Technique'].max>0?Math.round((cats['Technique'].pts/cats['Technique'].max)*100):null;
+  const macroScore=Math.round(((cats['Macro'].pts+cats['Catalyseurs'].pts)/25)*100);
+
+  function feuClass(s){return s===null?'':s>=60?'green-light':s>=40?'amber-light':'red-light';}
+  function feuEmoji(s){return s===null?'⚪':s>=60?'🟢':s>=40?'🟡':'🔴';}
+
+  document.getElementById('s-feux').style.display='flex';
+  ['fond','tech','macro'].forEach((id,i)=>{
+    const scores=[fondScore,techScore,macroScore];
+    const labels=['Fond.','Tech.','Macro'];
+    const el=document.getElementById('feu-'+id);
+    el.className='feu '+(scores[i]!==null?feuClass(scores[i]):'');
+    document.getElementById('feu-'+id+'-v').innerHTML=scores[i]!==null?feuEmoji(scores[i])+' '+(scores[i])+'%':'⚪ N/A';
+  });
+
+  // RENDU PRINCIPAL
+  document.getElementById('s-ticker').innerHTML=ticker.toUpperCase()+(halalOn?'<span class="halal-badge">☪ Halal</span>':'');
+  document.getElementById('s-number').textContent=score;
+  document.getElementById('s-number').style.color=col.text;
+  document.getElementById('s-label').textContent='Score global d\'investissement';
+  document.getElementById('s-bar').style.width=score+'%';
+  document.getElementById('s-bar').style.background=col.bar;
+  document.getElementById('s-verdict').innerHTML=`<div style="color:${col.text};font-size:13px;font-weight:600;margin-bottom:4px">${verdict}</div><div class="verdict-advice">${advice}</div>`;
+
+  const catColors={'Valorisation':'#3A9BD5','Rentabilité':'#1D9E75','Croissance':'#9B59B6','Solidité financière':'#E67E22','Dividendes':'#E24B4A','Qualitatif':'#C9A84C','Technique':'#1ABFBF','Macro':'#3A9BD5','Catalyseurs':'#E9845E'};
+  let catsHtml='';
+  for(const[name,cat]of Object.entries(cats)){
+    if(cat.max===0)continue;
+    const pct=Math.round((cat.pts/cat.max)*100);
+    catsHtml+=`<div class="cat-row"><div class="cat-row-name">${name}</div><div class="cat-mini-track"><div class="cat-mini-fill" style="width:${pct}%;background:${catColors[name]||'#C9A84C'}"></div></div><div class="cat-row-pts">${Math.round(cat.pts)}/${cat.max}</div></div>`;
+  }
+  document.getElementById('s-cats').innerHTML=catsHtml;
+  document.getElementById('s-cats').style.display='block';
+
+  let detailHtml='';
+  for(const[name,cat]of Object.entries(cats)){
+    if(!cat.det||cat.det.length===0)continue;
+    detailHtml+=`<div class="detail-section"><div class="detail-section-title">${name}</div>`;
+    for(const d of cat.det){
+      detailHtml+=`<div class="detail-row"><div class="detail-dot" style="background:${dotColor(d.s)}"></div><div class="detail-name">${d.n}</div><div class="detail-val">${d.v}</div><div class="detail-pts-badge" style="${badgeStyle(d.s)}">${Math.round(d.p)} pts</div></div>`;
+    }
+    detailHtml+='</div>';
+  }
+  const detEl=document.getElementById('s-detail');
+  detEl.innerHTML=`<div class="panel"><div class="panel-header"><div class="panel-header-dot"></div>Détail par indicateur</div><div class="panel-body">${detailHtml}</div></div>`;
+  detEl.style.display='block';
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function resetAll(){
+  document.querySelectorAll('input[type=number],input[type=text]').forEach(i=>i.value='');
+  document.querySelectorAll('select').forEach(s=>s.selectedIndex=0);
+  document.querySelectorAll('input[type=hidden]').forEach(i=>i.value='');
+  document.querySelectorAll('.yn-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.sc-btn').forEach(b=>b.classList.remove('active-vn','active-n','active-neu','active-p','active-vp'));
+  halalOn=false;
+  document.getElementById('htoggle').classList.remove('on');
+  document.getElementById('s-ticker').textContent='EN ATTENTE';
+  document.getElementById('s-number').textContent='—';
+  document.getElementById('s-number').style.color='#fff';
+  document.getElementById('s-label').textContent='Renseignez les données';
+  document.getElementById('s-bar').style.width='0';
+  document.getElementById('s-verdict').innerHTML='<div class="empty"><span class="empty-icon">📊</span><p>Remplissez le formulaire et cliquez sur <strong>Calculer</strong> pour voir votre analyse complète.</p></div>';
+  document.getElementById('s-feux').style.display='none';
+  document.getElementById('s-cats').style.display='none';
+  document.getElementById('s-detail').style.display='none';
+}
+</script>
+</body>
+</html>
